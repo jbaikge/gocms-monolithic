@@ -1,0 +1,17 @@
+graph {
+  subgraph cluster_overview {
+    label="Overview"
+    browser -- ui
+    ui -- cms
+    cms -- database
+    cms -- "message service"
+  }
+
+  subgraph cluster_engine {
+    label="CMS Engine"
+    core -- modules
+    modules -- class
+    class -- document
+    modules -- form
+  }
+}
