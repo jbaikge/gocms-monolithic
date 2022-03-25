@@ -9,7 +9,7 @@ type Option struct {
 type Type int
 
 type Field struct {
-	Id      int64
+	Id      string `bson:"_id"`
 	Name    string
 	Label   string
 	Type    Type
@@ -18,7 +18,7 @@ type Field struct {
 }
 
 type Class struct {
-	Id     int64
+	Id     string `bson:"_id"`
 	Slug   string
 	Fields []Field
 }
