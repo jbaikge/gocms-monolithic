@@ -17,6 +17,7 @@ const (
 	TypeText        = "text"
 	TypeTextArea    = "textarea"
 	TypeTime        = "time"
+	TypeTinyMCE     = "tinymce"
 )
 
 type Option struct {
