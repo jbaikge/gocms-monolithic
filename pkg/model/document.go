@@ -1,6 +1,23 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+const (
+	TypeDate        = "date"
+	TypeDateTime    = "datetime"
+	TypeEmail       = "email"
+	TypeMultiSelect = "multiselect"
+	TypeNumber      = "number"
+	TypeSection     = "section"
+	TypeSelect      = "select"
+	TypeText        = "text"
+	TypeTextArea    = "textarea"
+	TypeTime        = "time"
+)
 
 type Option struct {
 	Value    string
@@ -8,38 +25,29 @@ type Option struct {
 	Selected bool
 }
 
-type Type int
-
 type Field struct {
-	Id      primitive.ObjectID `bson:"_id"`
 	Name    string
 	Label   string
-	Type    Type
+	Type    string
 	Options []Option
 	Fields  []Field
 }
 
 type Class struct {
-	Id     primitive.ObjectID `bson:"_id,omitempty"`
-	Slug   string
-	Fields []Field
+	Id      primitive.ObjectID `bson:"_id,omitempty"`
+	Slug    string
+	Created time.Time
+	Updated time.Time
+	Fields  []Field
 }
 
 type Document struct {
-	Id     int64
-	Slug   string
-	Class  Class
-	Values map[string]interface{}
+	Id        primitive.ObjectID `bson:"_id,omitempty"`
+	ClassId   primitive.ObjectID `bson:"class_id"`
+	Slug      string
+	Created   time.Time
+	Updated   time.Time
+	Published time.Time
+	Class     *Class `bson:",omitempty"`
+	Values    map[string]interface{}
 }
-
-const (
-	Text Type = iota
-	TextArea
-	Number
-	Date
-	Time
-	Email
-	Select
-	MultiSelect
-	Section
-)
