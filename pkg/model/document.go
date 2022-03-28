@@ -1,4 +1,6 @@
-package document
+package model
+
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Option struct {
 	Value    string
@@ -9,7 +11,7 @@ type Option struct {
 type Type int
 
 type Field struct {
-	Id      string `bson:"_id"`
+	Id      primitive.ObjectID `bson:"_id"`
 	Name    string
 	Label   string
 	Type    Type
@@ -18,7 +20,7 @@ type Field struct {
 }
 
 type Class struct {
-	Id     string `bson:"_id"`
+	Id     primitive.ObjectID `bson:"_id,omitempty"`
 	Slug   string
 	Fields []Field
 }
