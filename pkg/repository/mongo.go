@@ -97,14 +97,6 @@ func (m mongoRepository) InsertDocument(doc *model.Document) (err error) {
 	doc.Created = now
 	doc.Updated = now
 
-	// Store class to the side to keep it out of the DB; give it back before the
-	// func ends
-	// tmpClass := doc.Class
-	// doc.Class = nil
-	// defer func() {
-	// 	doc.Class = tmpClass
-	// }()
-
 	result, err := m.documents.InsertOne(m.context, doc)
 	id, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
@@ -117,14 +109,6 @@ func (m mongoRepository) InsertDocument(doc *model.Document) (err error) {
 
 func (m mongoRepository) UpdateDocument(doc *model.Document) (err error) {
 	doc.Updated = time.Now()
-
-	// Store class to the side to keep it out of the DB; give it back before the
-	// func ends
-	// tmpClass := doc.Class
-	// doc.Class = nil
-	// defer func() {
-	// 	doc.Class = tmpClass
-	// }()
 
 	filter := bson.M{"_id": doc.Id}
 	result, err := m.documents.ReplaceOne(m.context, filter, doc)
