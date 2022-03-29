@@ -49,6 +49,6 @@ type Document struct {
 	Created   time.Time
 	Updated   time.Time
 	Published time.Time
-	Class     *Class `bson:",omitempty"`
+	Class     Class `bson:"-"`
 	Values    map[string]interface{}
 }
