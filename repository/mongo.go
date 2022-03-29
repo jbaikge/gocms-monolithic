@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/jbaikge/gocms/pkg/model"
+	"github.com/jbaikge/gocms"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,13 +37,13 @@ func (m mongoRepository) DeleteClass(id primitive.ObjectID) (err error) {
 	return
 }
 
-func (m mongoRepository) GetClass(id primitive.ObjectID) (class model.Class, err error) {
+func (m mongoRepository) GetClass(id primitive.ObjectID) (class gocms.Class, err error) {
 	filter := bson.M{"_id": id}
 	err = m.classes.FindOne(m.context, filter).Decode(&class)
 	return
 }
 
-func (m mongoRepository) InsertClass(class *model.Class) (err error) {
+func (m mongoRepository) InsertClass(class *gocms.Class) (err error) {
 	now := time.Now()
 	class.Created = now
 	class.Updated = now
@@ -56,7 +56,7 @@ func (m mongoRepository) InsertClass(class *model.Class) (err error) {
 	return
 }
 
-func (m mongoRepository) UpdateClass(class *model.Class) (err error) {
+func (m mongoRepository) UpdateClass(class *gocms.Class) (err error) {
 	class.Updated = time.Now()
 	filter := bson.M{"_id": class.Id}
 	result, err := m.classes.ReplaceOne(m.context, filter, class)
@@ -78,7 +78,7 @@ func (m mongoRepository) DeleteDocument(id primitive.ObjectID) (err error) {
 	return
 }
 
-func (m mongoRepository) GetDocument(id primitive.ObjectID) (doc model.Document, err error) {
+func (m mongoRepository) GetDocument(id primitive.ObjectID) (doc gocms.Document, err error) {
 	filter := bson.M{"_id": id}
 	err = m.documents.FindOne(m.context, filter).Decode(&doc)
 	if err != nil {
@@ -92,7 +92,7 @@ func (m mongoRepository) GetDocument(id primitive.ObjectID) (doc model.Document,
 	return
 }
 
-func (m mongoRepository) InsertDocument(doc *model.Document) (err error) {
+func (m mongoRepository) InsertDocument(doc *gocms.Document) (err error) {
 	now := time.Now()
 	doc.Created = now
 	doc.Updated = now
@@ -107,7 +107,7 @@ func (m mongoRepository) InsertDocument(doc *model.Document) (err error) {
 	return
 }
 
-func (m mongoRepository) UpdateDocument(doc *model.Document) (err error) {
+func (m mongoRepository) UpdateDocument(doc *gocms.Document) (err error) {
 	doc.Updated = time.Now()
 
 	filter := bson.M{"_id": doc.Id}

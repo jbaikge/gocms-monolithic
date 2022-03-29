@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jbaikge/gocms/pkg/model"
+	"github.com/jbaikge/gocms"
 	"github.com/zeebo/assert"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -30,7 +30,7 @@ func TestMongo(t *testing.T) {
 
 	t.Run("Class", func(t *testing.T) {
 		t.Run("Create", func(t *testing.T) {
-			class := model.Class{
+			class := gocms.Class{
 				Slug: "create_test",
 			}
 			assert.NoError(t, repo.InsertClass(&class))
@@ -40,7 +40,7 @@ func TestMongo(t *testing.T) {
 		})
 
 		t.Run("Read", func(t *testing.T) {
-			class := model.Class{
+			class := gocms.Class{
 				Slug: "read_test",
 			}
 			assert.NoError(t, repo.InsertClass(&class))
@@ -51,7 +51,7 @@ func TestMongo(t *testing.T) {
 		})
 
 		t.Run("Update", func(t *testing.T) {
-			class := model.Class{
+			class := gocms.Class{
 				Slug: "update_test",
 			}
 			assert.NoError(t, repo.InsertClass(&class))
@@ -67,7 +67,7 @@ func TestMongo(t *testing.T) {
 		})
 
 		t.Run("Delete", func(t *testing.T) {
-			class := model.Class{}
+			class := gocms.Class{}
 			assert.NoError(t, repo.InsertClass(&class))
 			assert.NoError(t, repo.DeleteClass(class.Id))
 			_, err := repo.GetClass(class.Id)
@@ -78,13 +78,13 @@ func TestMongo(t *testing.T) {
 
 	t.Run("Document", func(t *testing.T) {
 		// Class used for tests below
-		class := model.Class{
+		class := gocms.Class{
 			Slug: "class_test",
 		}
 		assert.NoError(t, repo.InsertClass(&class))
 
 		t.Run("Create", func(t *testing.T) {
-			doc := model.Document{
+			doc := gocms.Document{
 				Slug: "create_test",
 			}
 			assert.NoError(t, repo.InsertDocument(&doc))
@@ -94,7 +94,7 @@ func TestMongo(t *testing.T) {
 		})
 
 		t.Run("Read", func(t *testing.T) {
-			doc := model.Document{
+			doc := gocms.Document{
 				ClassId: class.Id,
 				Slug:    "read_test",
 			}
@@ -107,7 +107,7 @@ func TestMongo(t *testing.T) {
 		})
 
 		t.Run("Update", func(t *testing.T) {
-			doc := model.Document{
+			doc := gocms.Document{
 				ClassId: class.Id,
 				Slug:    "update_test",
 			}
@@ -124,7 +124,7 @@ func TestMongo(t *testing.T) {
 		})
 
 		t.Run("Delete", func(t *testing.T) {
-			doc := model.Document{}
+			doc := gocms.Document{}
 			assert.NoError(t, repo.InsertDocument(&doc))
 			assert.NoError(t, repo.DeleteDocument(doc.Id))
 
