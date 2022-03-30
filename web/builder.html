@@ -56,7 +56,7 @@
         </nav>
       </aside>
       <article class="flex-grow-1 p-3">
-          <h1 class="mb-3">My Class Fields</h1>
+          <h1 class="fs-2 mb-3">My Class Fields</h1>
           <form method="post">
             <ul id="class-fields" class="list-unstyled d-grid gap-3"><!-- No spaces so :empty triggers --></ul>
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -64,22 +64,23 @@
       </article>
       <aside class="bg-dark text-secondary p-3">
         <ul id="field-types" class="list-unstyled d-grid gap-3">
-          <li class="d-grid"><button class="btn btn-secondary" data-type="date">Date</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="datetime">Date & Time</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="email">Email</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="multiselect">Multi-Select</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="number">Number</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="section">Section</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="select">Select</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="text">Text</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="textarea">Textarea</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="time">Time</button></li>
-          <li class="d-grid"><button class="btn btn-secondary" data-type="tinymce">TinyMCE</button></li>
+          <li class="d-grid" data-template="date" data-type="date" data-label="Date"><button class="btn btn-secondary">Date</button></li>
+          <li class="d-grid" data-template="date" data-type="datetime-local" data-label="Date &amp; Time"><button class="btn btn-secondary">Date &amp; Time</button></li>
+          <li class="d-grid" data-template="email" data-type="email" data-label="Email"><button class="btn btn-secondary">Email</button></li>
+          <li class="d-grid" data-template="select" data-type="multiselect" data-label="Multi-Select"><button class="btn btn-secondary">Multi-Select</button></li>
+          <li class="d-grid" data-template="number" data-type="number" data-label="Number"><button class="btn btn-secondary">Number</button></li>
+          <li class="d-grid" data-template="section" data-type="section" data-label="Section"><button class="btn btn-secondary">Section</button></li>
+          <li class="d-grid" data-template="select" data-type="select" data-label="Select"><button class="btn btn-secondary">Select</button></li>
+          <li class="d-grid" data-template="text" data-type="text" data-label="Text"><button class="btn btn-secondary">Text</button></li>
+          <li class="d-grid" data-template="textarea" data-type="textarea" data-label="Textarea"><button class="btn btn-secondary">Textarea</button></li>
+          <li class="d-grid" data-template="date" data-type="time" data-label="Time"><button class="btn btn-secondary">Time</button></li>
+          <li class="d-grid" data-template="tinymce" data-type="tinymce" data-label="TinyMCE"><button class="btn btn-secondary">TinyMCE</button></li>
         </ul>
       </aside>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
     <script>
       const fieldTypes = document.getElementById('field-types');
       const fieldTypesOptions = {
@@ -101,31 +102,104 @@
         emptyInsertThreshold: 20, // defaults to 5
         handle: '.sortable-handle',
         onAdd: function(event) {
-          const label = event.item.innerText;
-          event.item.innerHTML = document.getElementById('field-template').innerHTML;
-          event.item.querySelector('.field-type').innerText = label;
+          const data = event.item.dataset;
+          const templateId = 'field-' + data.template;
+          const replacements = [
+            ['field', document.getElementById(templateId).innerHTML],
+            ['type', data.type],
+            ['label', data.label],
+            ['id', 'field-' + uuidv4()],
+          ];
+
+          let html = document.getElementById('field-row').innerHTML;
+          replacements.forEach(set => {
+            const search = '{{' + set[0] + '}}';
+            html = html.replaceAll(search, set[1]);
+          });
+
+          event.item.innerHTML = html;
         },
       };
       Sortable.create(classFields, classFieldsOptions);
     </script>
-    <script id="field-template" type="text/template">
+    <script id="field-row" type="text/template">
       <div class="d-flex">
         <div class="d-flex sortable-handle">::</div>
         <div class="flex-grow-1 mx-3">
-          <h2 class="field-type"></h2>
-          <div class="d-lg-flex gap-3">
-            <div class="w-50">
-              <label>Label</label>
-              <input type="text" class="form-control" name="label" value="">
-            </div>
-            <div class="w-50">
-              <label>Name</label>
-              <input type="text" class="form-control" name="name" value="">
-            </div>
-          </div>
+          <h2 class="fs-5 field-type-name">{{label}}</h2>
+          {{field}}
+          <input type="hidden" name="type[{{id}}]" value="{{type}}">
         </div>
         <div class="d-flex align-items-start">
           <button type="button" class="btn btn-close" aria-label="Remove"></button>
+        </div>
+      </div>
+    </script>
+    <script id="field-text" type="text/template">
+      <div class="d-lg-flex gap-3 pb-3">
+        <div class="w-50">
+          <label for="{{id}}-label">Label</label>
+          <input type="text" id="{{id}}-label" class="form-control" name="label[{{id}}]" value="" required>
+        </div>
+        <div class="w-50">
+          <label for="{{id}}-name">Name</label>
+          <input type="text" id="{{id}}-name" class="form-control" name="name[{{id}}]" value="" required>
+        </div>
+      </div>
+    </script>
+    <script id="field-date" type="text/template">
+      <div class="d-lg-flex gap-3 pb-3">
+        <div class="w-50">
+          <label for="{{id}}-label">Label</label>
+          <input type="text" id="{{id}}-label" class="form-control" name="label[{{id}}]" value="" required>
+        </div>
+        <div class="w-50">
+          <label for="{{id}}-name">Name</label>
+          <input type="text" id="{{id}}-name" class="form-control" name="name[{{id}}]" value="" required>
+        </div>
+      </div>
+      <div class="d-lg-flex gap-3 pb-3">
+        <div class="w-25">
+          <label for="{{id}}-min">Min</label>
+          <input type="text" id="{{id}}-min" class="form-control" name="min[{{id}}]" value="">
+        </div>
+        <div class="w-25">
+          <label for="{{id}}-max">Max</label>
+          <input type="text" id="{{id}}-max" class="form-control" name="max[{{id}}]" value="">
+        </div>
+        <div class="w-25">
+          <label for="{{id}}-step">Step</label>
+          <input type="text" id="{{id}}-step" class="form-control" name="step[{{id}}]" value="">
+        </div>
+        <div class="w-25"><!-- placeholder --></div>
+      </div>
+    </script>
+    <script id="field-number" type="text/template">
+      <div class="d-lg-flex gap-3 pb-3">
+        <div class="w-50">
+          <label for="{{id}}-label">Label</label>
+          <input type="text" id="{{id}}-label" class="form-control" name="label[{{id}}]" value="" required>
+        </div>
+        <div class="w-50">
+          <label for="{{id}}-name">Name</label>
+          <input type="text" id="{{id}}-name" class="form-control" name="name[{{id}}]" value="" required>
+        </div>
+      </div>
+      <div class="d-lg-flex gap-3 pb-3">
+        <div class="w-25">
+          <label for="{{id}}-min">Min</label>
+          <input type="text" id="{{id}}-min" class="form-control" name="min[{{id}}]" value="">
+        </div>
+        <div class="w-25">
+          <label for="{{id}}-max">Max</label>
+          <input type="text" id="{{id}}-max" class="form-control" name="max[{{id}}]" value="">
+        </div>
+        <div class="w-25">
+          <label for="{{id}}-step">Step</label>
+          <input type="text" id="{{id}}-step" class="form-control" name="step[{{id}}]" value="">
+        </div>
+        <div class="w-25">
+
         </div>
       </div>
     </script>
