@@ -19,12 +19,14 @@
         content: 'Drag fields here';
         padding: 1em 0;
       }
+      /*
       .class-fields li:not(:last-child)::after {
         display: block;
         content: '';
         border-bottom: 1px solid var(--bs-secondary);
         padding-top: 1rem;
       }
+      */
       .sortable-ghost {
         opacity: 0.5;
       }
@@ -88,17 +90,39 @@
         </div>
       </template>
       <template id="common-template">
-        <div class="row">
+        <div class="row g-3">
           <div class="col-lg-6">
             <div class="form-floating">
-              <input type="text" id="${id}-label" class="form-control" name="label[${id}]" value="" placeholder="Field Label" required>
+              <input type="text" id="${id}-label" class="form-control mb-3" name="label[${id}]" placeholder="Field Label" value="" required>
               <label for="${id}-label">Field Label</label>
             </div>
           </div>
           <div class="col-lg-6">
             <div class="form-floating">
-              <input type="text" id="${id}-label" class="form-control" name="label[${id}]" value="" placeholder="Field Name" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" required>
-              <label for="${id}-label">Field Name</label>
+              <input type="text" id="${id}-name" class="form-control mb-3" name="name[${id}]" placeholder="Field Name" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="" required>
+              <label for="${id}-name">Field Name</label>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template id="date-template">
+        <div class="row g-3">
+          <div class="col-lg-3">
+            <div class="form-floating">
+              <input type="date" id="${id}-min" class="form-control mb-3" name="min[${id}]" placeholder="Min Date" value="">
+              <label for="${id}-min">Min Date</label>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="form-floating">
+              <input type="date" id="${id}-max" class="form-control mb-3" name="max[${id}]" placeholder="Max Date" value="">
+              <label for="${id}-max">Max Date</label>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="form-floating">
+              <input type="number" id="${id}-step" class="form-control mb-3" name="step[${id}]" min="0" placeholder="Step (seconds)" value="">
+              <label for="${id}-step">Step (seconds)</label>
             </div>
           </div>
         </div>
