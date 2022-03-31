@@ -12,17 +12,14 @@
           flex-shrink: 0;
         }
       }
-      #class-fields:empty {
+      .class-fields:empty::after {
         background-color: var(--bs-secondary);
         color: var(--bs-light);
-      }
-      #class-fields:empty::after {
         text-align: center;
-        content: 'Drag items here';
-        padding-top: 1em;
-        padding-bottom: 1em;
+        content: 'Drag fields here';
+        padding: 1em 0;
       }
-      #class-fields li:not(:last-child)::after {
+      .class-fields li:not(:last-child)::after {
         display: block;
         content: '';
         border-bottom: 1px solid var(--bs-secondary);
@@ -58,7 +55,7 @@
       <article class="flex-grow-1 p-3">
           <h1 class="fs-2 mb-3">My Class Fields</h1>
           <form method="post">
-            <ul id="class-fields" class="list-unstyled d-grid gap-3"><!-- No spaces so :empty triggers --></ul>
+            <ul id="class-fields" class="list-unstyled d-grid gap-3 class-fields"><!-- No spaces so :empty triggers --></ul>
             <button type="submit" class="btn btn-primary">Submit</button>
           </form>
       </article>
@@ -104,11 +101,13 @@
         onAdd: function(event) {
           const data = event.item.dataset;
           const templateId = 'field-' + data.template;
+          const uuid = uuidv4();
           const replacements = [
             ['field', document.getElementById(templateId).innerHTML],
             ['type', data.type],
             ['label', data.label],
-            ['id', 'field-' + uuidv4()],
+            ['uuid', uuid],
+            ['id', 'field-' + uuid],
           ];
 
           let html = document.getElementById('field-row').innerHTML;
@@ -118,6 +117,12 @@
           });
 
           event.item.innerHTML = html;
+          event.item.setAttribute('id', 'item-' + uuid);
+          event.item.querySelector('button.btn-close').addEventListener('click', function(event) {
+            event.preventDefault();
+            const item = document.getElementById(event.target.dataset.target);
+            item.parentNode.removeChild(item);
+          });
         },
       };
       Sortable.create(classFields, classFieldsOptions);
@@ -131,7 +136,7 @@
           <input type="hidden" name="type[{{id}}]" value="{{type}}">
         </div>
         <div class="d-flex align-items-start">
-          <button type="button" class="btn btn-close" aria-label="Remove"></button>
+          <button type="button" class="btn btn-close" aria-label="Remove" data-target="item-{{uuid}}"></button>
         </div>
       </div>
     </script>
@@ -171,7 +176,13 @@
           <label for="{{id}}-step">Step</label>
           <input type="text" id="{{id}}-step" class="form-control" name="step[{{id}}]" value="">
         </div>
-        <div class="w-25"><!-- placeholder --></div>
+        <div class="w-25">
+          <label>Value Requirement</label>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="1" id="{{id}}-required">
+            <label class="form-check-label" for="{{id}}-required">Required</label>
+          </div>
+        </div>
       </div>
     </script>
     <script id="field-number" type="text/template">
@@ -198,9 +209,7 @@
           <label for="{{id}}-step">Step</label>
           <input type="text" id="{{id}}-step" class="form-control" name="step[{{id}}]" value="">
         </div>
-        <div class="w-25">
-
-        </div>
+        <div class="w-25"></div>
       </div>
     </script>
   </body>
