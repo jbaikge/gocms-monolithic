@@ -53,11 +53,11 @@
         </nav>
       </aside>
       <article class="flex-grow-1 p-3">
-          <h1 class="fs-2 mb-3">My Class Fields</h1>
-          <form method="post">
-            <ul id="class-fields" class="list-unstyled d-grid gap-3 class-fields"><!-- No spaces so :empty triggers --></ul>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
+        <h1 class="fs-2 mb-3">My Class Fields</h1>
+        <form method="post">
+          <ul id="class-fields" class="list-unstyled d-grid gap-3 class-fields"><!-- No spaces so :empty triggers --></ul>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
       </article>
       <aside class="bg-dark text-secondary p-3">
         <ul id="field-types" class="list-unstyled d-grid gap-3">
@@ -74,6 +74,30 @@
         </ul>
       </aside>
     </main>
+    <div id="templates">
+      <template id="item-template">
+        <div class="d-flex">
+          <div class="d-flex sortable-handle">::</div>
+          <div class="flex-grow-1 mx-3 field-definition">
+            <h2 class="fs-5">${label}</h2>
+            <input type="hidden" name="ids[]" value="${uuid}">
+          </div>
+          <div class="d-flex align-items-start">
+            <button type="button" class="btn btn-close" aria-label="Remove" data-target="item-${uuid}"></button>
+          </div>
+        </div>
+      </template>
+      <template id="common-template">
+        <div class="row">
+          <div class="col-lg-6">
+            <div class="form-floating">
+              <input type="text" id="${id}-label" class="form-control" name="label[${id}]" value="" placeholder="Field Label" required>
+              <label for="${id}-label">Field Label</label>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
@@ -98,24 +122,44 @@
         emptyInsertThreshold: 20, // defaults to 5
         handle: '.sortable-handle',
         onAdd: function(event) {
-          const data = event.item.dataset;
-          const templateId = 'field-' + data.template;
+          // Pull in templates and build the form fields
+          const item = document.getElementById('item-template').content.cloneNode(true);
+          event.item.replaceChildren(item);
+
+          const definition = event.item.querySelector('.field-definition');
+
+          const common = document.getElementById('common-template').content.cloneNode(true);
+          definition.appendChild(common);
+
+          const template = document.getElementById(event.item.dataset.template + '-template');
+          if (template != null) {
+            definition.appendChild(template.content.cloneNode(true));
+          }
+
+          // Build the replacements to handle ${var} in attributes and text
           const uuid = uuidv4();
-          const replacements = [
-            ['field', document.getElementById(templateId).innerHTML],
-            ['type', data.type],
-            ['label', data.label],
-            ['uuid', uuid],
-            ['id', 'field-' + uuid],
-          ];
+          const replacements = {
+            'uuid':  uuid,
+            'id':    'field-' + uuid,
+            'label': event.item.dataset.label,
+            'type':  event.item.dataset.type,
+          };
+          const replacer = Replacer.create(replacements);
 
-          let html = document.getElementById('field-row').innerHTML;
-          replacements.forEach(set => {
-            const search = '$' + set[0] + '$';
-            html = html.replaceAll(search, set[1]);
-          });
+          // Walk the nodes and their attributes to replace variables
+          const walker = document.createTreeWalker(event.item, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+          for (let current = walker.currentNode; current != null; current = walker.nextNode()) {
+            if (current.nodeType == Node.TEXT_NODE) {
+              current.textContent = replacer.replace(current.textContent);
+            }
+            if (current.nodeType == Node.ELEMENT_NODE && current.hasAttributes()) {
+              for (let attr of current.attributes) {
+                attr.value = replacer.replace(attr.value);
+              }
+            }
+          }
 
-          event.item.innerHTML = html;
+          // Set up the close button
           event.item.setAttribute('id', 'item-' + uuid);
           event.item.querySelector('button.btn-close').addEventListener('click', function(event) {
             event.preventDefault();
@@ -125,92 +169,26 @@
         },
       };
       Sortable.create(classFields, classFieldsOptions);
-    </script>
-    <script id="field-row" type="text/template">
-      <div class="d-flex">
-        <div class="d-flex sortable-handle">::</div>
-        <div class="flex-grow-1 mx-3">
-          <h2 class="fs-5 field-type-name">$label$</h2>
-          $field$
-          <input type="hidden" name="type[$id$]" value="$type$">
-        </div>
-        <div class="d-flex align-items-start">
-          <button type="button" class="btn btn-close" aria-label="Remove" data-target="item-$uuid$"></button>
-        </div>
-      </div>
-    </script>
-    <script id="field-text" type="text/template">
-      <div class="d-lg-flex gap-3 pb-3">
-        <div class="w-50">
-          <label for="$id$-label">Label</label>
-          <input type="text" id="$id$-label" class="form-control" name="label[$id$]" value="" required>
-        </div>
-        <div class="w-50">
-          <label for="$id$-name">Name</label>
-          <input type="text" id="$id$-name" class="form-control" name="name[$id$]" value="" required>
-        </div>
-      </div>
-    </script>
-    <script id="field-date" type="text/template">
-      <div class="d-lg-flex gap-3 pb-3">
-        <div class="w-50">
-          <label for="$id$-label">Label</label>
-          <input type="text" id="$id$-label" class="form-control" name="label[$id$]" value="" required>
-        </div>
-        <div class="w-50">
-          <label for="$id$-name">Name</label>
-          <input type="text" id="$id$-name" class="form-control" name="name[$id$]" value="" required>
-        </div>
-      </div>
-      <div class="d-lg-flex gap-3 pb-3">
-        <div class="w-25">
-          <label for="$id$-min">Min</label>
-          <input type="text" id="$id$-min" class="form-control" name="min[$id$]" value="">
-        </div>
-        <div class="w-25">
-          <label for="$id$-max">Max</label>
-          <input type="text" id="$id$-max" class="form-control" name="max[$id$]" value="">
-        </div>
-        <div class="w-25">
-          <label for="$id$-step">Step</label>
-          <input type="text" id="$id$-step" class="form-control" name="step[$id$]" value="">
-        </div>
-        <div class="w-25">
-          <label>Value Requirement</label>
-          <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="1" id="$id$-required">
-            <label class="form-check-label" for="$id$-required">Required</label>
-          </div>
-        </div>
-      </div>
-    </script>
-    <script id="field-number" type="text/template">
-      <div class="d-lg-flex gap-3 pb-3">
-        <div class="w-50">
-          <label for="$id$-label">Label</label>
-          <input type="text" id="$id$-label" class="form-control" name="label[$id$]" value="" required>
-        </div>
-        <div class="w-50">
-          <label for="$id$-name">Name</label>
-          <input type="text" id="$id$-name" class="form-control" name="name[$id$]" value="" required>
-        </div>
-      </div>
-      <div class="d-lg-flex gap-3 pb-3">
-        <div class="w-25">
-          <label for="$id$-min">Min</label>
-          <input type="text" id="$id$-min" class="form-control" name="min[$id$]" value="">
-        </div>
-        <div class="w-25">
-          <label for="$id$-max">Max</label>
-          <input type="text" id="$id$-max" class="form-control" name="max[$id$]" value="">
-        </div>
-        <div class="w-25">
-          <label for="$id$-step">Step</label>
-          <input type="text" id="$id$-step" class="form-control" name="step[$id$]" value="">
-        </div>
-        <div class="w-25"></div>
-      </div>
-    </script>
 
+      const Replacer = (function() {
+        const create = function(replacements) {
+          const replace = function(text) {
+            for (let key in replacements) {
+              const search = '${' + key + '}';
+              text = text.replaceAll(search, replacements[key]);
+            }
+            return text;
+          };
+
+          return {
+            replace: replace,
+          };
+        };
+
+        return {
+          create: create,
+        }
+      })();
+    </script>
   </body>
 </html>
