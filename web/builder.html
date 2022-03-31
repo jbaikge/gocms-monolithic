@@ -71,7 +71,7 @@
           <li class="d-grid" data-template="select" data-type="select" data-label="Select"><button class="btn btn-secondary">Select</button></li>
           <li class="d-grid" data-template="text" data-type="text" data-label="Text"><button class="btn btn-secondary">Text</button></li>
           <li class="d-grid" data-template="textarea" data-type="textarea" data-label="Textarea"><button class="btn btn-secondary">Textarea</button></li>
-          <li class="d-grid" data-template="date" data-type="time" data-label="Time"><button class="btn btn-secondary">Time</button></li>
+          <li class="d-grid" data-template="time" data-type="time" data-label="Time"><button class="btn btn-secondary">Time</button></li>
           <li class="d-grid" data-template="tinymce" data-type="tinymce" data-label="TinyMCE"><button class="btn btn-secondary">TinyMCE</button></li>
         </ul>
       </aside>
@@ -117,6 +117,28 @@
             <div class="form-floating">
               <input type="date" id="${id}-max" class="form-control mb-3" name="max[${id}]" placeholder="Max Date" value="">
               <label for="${id}-max">Max Date</label>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="form-floating">
+              <input type="number" id="${id}-step" class="form-control mb-3" name="step[${id}]" min="0" placeholder="Step (seconds)" value="">
+              <label for="${id}-step">Step (seconds)</label>
+            </div>
+          </div>
+        </div>
+      </template>
+      <template id="time-template">
+        <div class="row g-3">
+          <div class="col-lg-3">
+            <div class="form-floating">
+              <input type="time" id="${id}-min" class="form-control mb-3" name="min[${id}]" placeholder="Min Time" value="">
+              <label for="${id}-min">Min Time</label>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="form-floating">
+              <input type="time" id="${id}-max" class="form-control mb-3" name="max[${id}]" placeholder="Max Time" value="">
+              <label for="${id}-max">Max Time</label>
             </div>
           </div>
           <div class="col-lg-3">
