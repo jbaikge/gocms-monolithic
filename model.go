@@ -13,7 +13,6 @@ const (
 	TypeMultiSelect = "multiselect"
 	TypeNumber      = "number"
 	TypeSection     = "section"
-	TypeSelect      = "select"
 	TypeText        = "text"
 	TypeTextArea    = "textarea"
 	TypeTime        = "time"
