@@ -112,7 +112,7 @@
 
           let html = document.getElementById('field-row').innerHTML;
           replacements.forEach(set => {
-            const search = '{{' + set[0] + '}}';
+            const search = '$' + set[0] + '$';
             html = html.replaceAll(search, set[1]);
           });
 
@@ -131,56 +131,56 @@
       <div class="d-flex">
         <div class="d-flex sortable-handle">::</div>
         <div class="flex-grow-1 mx-3">
-          <h2 class="fs-5 field-type-name">{{label}}</h2>
-          {{field}}
-          <input type="hidden" name="type[{{id}}]" value="{{type}}">
+          <h2 class="fs-5 field-type-name">$label$</h2>
+          $field$
+          <input type="hidden" name="type[$id$]" value="$type$">
         </div>
         <div class="d-flex align-items-start">
-          <button type="button" class="btn btn-close" aria-label="Remove" data-target="item-{{uuid}}"></button>
+          <button type="button" class="btn btn-close" aria-label="Remove" data-target="item-$uuid$"></button>
         </div>
       </div>
     </script>
     <script id="field-text" type="text/template">
       <div class="d-lg-flex gap-3 pb-3">
         <div class="w-50">
-          <label for="{{id}}-label">Label</label>
-          <input type="text" id="{{id}}-label" class="form-control" name="label[{{id}}]" value="" required>
+          <label for="$id$-label">Label</label>
+          <input type="text" id="$id$-label" class="form-control" name="label[$id$]" value="" required>
         </div>
         <div class="w-50">
-          <label for="{{id}}-name">Name</label>
-          <input type="text" id="{{id}}-name" class="form-control" name="name[{{id}}]" value="" required>
+          <label for="$id$-name">Name</label>
+          <input type="text" id="$id$-name" class="form-control" name="name[$id$]" value="" required>
         </div>
       </div>
     </script>
     <script id="field-date" type="text/template">
       <div class="d-lg-flex gap-3 pb-3">
         <div class="w-50">
-          <label for="{{id}}-label">Label</label>
-          <input type="text" id="{{id}}-label" class="form-control" name="label[{{id}}]" value="" required>
+          <label for="$id$-label">Label</label>
+          <input type="text" id="$id$-label" class="form-control" name="label[$id$]" value="" required>
         </div>
         <div class="w-50">
-          <label for="{{id}}-name">Name</label>
-          <input type="text" id="{{id}}-name" class="form-control" name="name[{{id}}]" value="" required>
+          <label for="$id$-name">Name</label>
+          <input type="text" id="$id$-name" class="form-control" name="name[$id$]" value="" required>
         </div>
       </div>
       <div class="d-lg-flex gap-3 pb-3">
         <div class="w-25">
-          <label for="{{id}}-min">Min</label>
-          <input type="text" id="{{id}}-min" class="form-control" name="min[{{id}}]" value="">
+          <label for="$id$-min">Min</label>
+          <input type="text" id="$id$-min" class="form-control" name="min[$id$]" value="">
         </div>
         <div class="w-25">
-          <label for="{{id}}-max">Max</label>
-          <input type="text" id="{{id}}-max" class="form-control" name="max[{{id}}]" value="">
+          <label for="$id$-max">Max</label>
+          <input type="text" id="$id$-max" class="form-control" name="max[$id$]" value="">
         </div>
         <div class="w-25">
-          <label for="{{id}}-step">Step</label>
-          <input type="text" id="{{id}}-step" class="form-control" name="step[{{id}}]" value="">
+          <label for="$id$-step">Step</label>
+          <input type="text" id="$id$-step" class="form-control" name="step[$id$]" value="">
         </div>
         <div class="w-25">
           <label>Value Requirement</label>
           <div class="form-check">
-            <input class="form-check-input" type="checkbox" value="1" id="{{id}}-required">
-            <label class="form-check-label" for="{{id}}-required">Required</label>
+            <input class="form-check-input" type="checkbox" value="1" id="$id$-required">
+            <label class="form-check-label" for="$id$-required">Required</label>
           </div>
         </div>
       </div>
@@ -188,26 +188,26 @@
     <script id="field-number" type="text/template">
       <div class="d-lg-flex gap-3 pb-3">
         <div class="w-50">
-          <label for="{{id}}-label">Label</label>
-          <input type="text" id="{{id}}-label" class="form-control" name="label[{{id}}]" value="" required>
+          <label for="$id$-label">Label</label>
+          <input type="text" id="$id$-label" class="form-control" name="label[$id$]" value="" required>
         </div>
         <div class="w-50">
-          <label for="{{id}}-name">Name</label>
-          <input type="text" id="{{id}}-name" class="form-control" name="name[{{id}}]" value="" required>
+          <label for="$id$-name">Name</label>
+          <input type="text" id="$id$-name" class="form-control" name="name[$id$]" value="" required>
         </div>
       </div>
       <div class="d-lg-flex gap-3 pb-3">
         <div class="w-25">
-          <label for="{{id}}-min">Min</label>
-          <input type="text" id="{{id}}-min" class="form-control" name="min[{{id}}]" value="">
+          <label for="$id$-min">Min</label>
+          <input type="text" id="$id$-min" class="form-control" name="min[$id$]" value="">
         </div>
         <div class="w-25">
-          <label for="{{id}}-max">Max</label>
-          <input type="text" id="{{id}}-max" class="form-control" name="max[{{id}}]" value="">
+          <label for="$id$-max">Max</label>
+          <input type="text" id="$id$-max" class="form-control" name="max[$id$]" value="">
         </div>
         <div class="w-25">
-          <label for="{{id}}-step">Step</label>
-          <input type="text" id="{{id}}-step" class="form-control" name="step[{{id}}]" value="">
+          <label for="$id$-step">Step</label>
+          <input type="text" id="$id$-step" class="form-control" name="step[$id$]" value="">
         </div>
         <div class="w-25"></div>
       </div>
