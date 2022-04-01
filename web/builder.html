@@ -66,7 +66,7 @@
           <div class="d-flex sortable-handle">::</div>
           <div class="flex-grow-1 mx-3 field-definition">
             <h2 class="fs-5">${label}</h2>
-            <input type="hidden" name="types[]" value="${type}">
+            <input type="hidden" name="data[${id}][type]" value="${type}">
             <input type="hidden" name="fields[]" value="${id}">
           </div>
           <div class="d-flex align-items-start">
@@ -239,9 +239,112 @@
         return {
           create: create,
         };
-      })()
+      })();
     </script>
     <script>
+      const ClassFieldBuilder = (function() {
+        'use strict';
+
+        const suffix = '-template';
+
+        const addField = function(node, data) {
+          const item = document.getElementById('item' + suffix).content.cloneNode(true);
+          const common = document.getElementById('common' + suffix).content.cloneNode(true);
+          const template = document.getElementById(data.template + suffix);
+
+          const definition = item.querySelector('.field-definition');
+          definition.appendChild(common);
+          if (template != null) {
+            definition.appendChild(template.content.cloneNode(true));
+          }
+
+          Replacer.tree(item, data);
+
+          node.setAttribute('id', 'item-' + data.uuid);
+          item.querySelector('button.btn-close').addEventListener('click', function(event) {
+            event.preventDefault();
+            const item = document.getElementById(event.target.dataset.target);
+            item.parentNode.removeChild(item);
+          });
+
+          for (const key in data.values) {
+            const value = data.values[key];
+            const name = 'data[' + data.id + '][' + key + ']';
+            const selector = '[name="' + name + '"]';
+            const node = item.querySelector(selector);
+            if (node == null) {
+              console.error('Could not find node with name %s', name);
+              continue;
+            }
+            node.value = value;
+          }
+
+          node.replaceChildren(item);
+        };
+
+        const addHandler = function(event) {
+          let data = newData();
+          data.label = event.item.dataset.label;
+          data.type = event.item.dataset.type;
+          data.template = event.item.dataset.template;
+          addField(event.item, data);
+        };
+
+        // parent: ul node
+        // types:  fieldTypeDefinitions
+        // fields: classFieldDefinitions
+        const create = function(parent, types, fields) {
+          for (let i = 0; i < fields.length; i++) {
+            const field = fields[i];
+            const type = searchType(field.type, types);
+            if (type == null) {
+              console.error('Unsupported type: %s', field.type);
+              continue;
+            }
+
+            let data = newData();
+            data.label = type.label;
+            data.type = type.type;
+            data.template = type.template;
+            data.values = field.values;
+
+            const item = document.createElement('li');
+            parent.appendChild(item);
+
+            addField(item, data);
+          }
+        };
+
+        const newData = function() {
+          const uuid = uuidv4();
+          return {
+            'uuid':     uuid,
+            'id':       'field-' + uuid,
+            'label':    null,
+            'type':     null,
+            'template': null,
+            'values':   {},
+          };
+        }
+
+        const searchType = function(needle, haystack) {
+          for (let i = 0; i < haystack.length; i++) {
+            const type = haystack[i];
+            if (type.type == needle) {
+              return type;
+            }
+          }
+          return null;
+        };
+
+        return {
+          create: create,
+          addHandler: addHandler,
+        };
+      })();
+    </script>
+    <script>
+      // This will probably come from the server
       const fieldTypeDefinitions = [
         {
           type:     'date',
@@ -295,9 +398,22 @@
         },
       ];
 
+      // This will rebuild the field list for editing purposes
+      const classFieldDefinitions = [
+        {
+          type:  'text',
+          values: {
+            label: 'Test Label',
+            name:  'test_field',
+          },
+        },
+      ];
+
+      // Initialize field type buttons
       const fieldTypes = document.getElementById('field-types');
       FieldTypeBuilder.create(fieldTypes, fieldTypeDefinitions);
 
+      // Initialize field type DnD
       const fieldTypesOptions = {
         group: {
           name: 'field-types',
@@ -307,7 +423,11 @@
       };
       Sortable.create(fieldTypes, fieldTypesOptions);
 
+      // Initialize any pre-built class fields
       const classFields = document.getElementById('class-fields');
+      ClassFieldBuilder.create(classFields, fieldTypeDefinitions, classFieldDefinitions);
+
+      // Initialize class field DnD
       const classFieldsOptions = {
         group: {
           name: 'class-fields',
@@ -316,39 +436,7 @@
         animation: 150,
         emptyInsertThreshold: 20, // defaults to 5
         handle: '.sortable-handle',
-        onAdd: function(event) {
-          // Pull in templates and build the form fields
-          const item = document.getElementById('item-template').content.cloneNode(true);
-          event.item.replaceChildren(item);
-
-          const definition = event.item.querySelector('.field-definition');
-
-          const common = document.getElementById('common-template').content.cloneNode(true);
-          definition.appendChild(common);
-
-          const template = document.getElementById(event.item.dataset.template + '-template');
-          if (template != null) {
-            definition.appendChild(template.content.cloneNode(true));
-          }
-
-          // Build the replacements to handle ${var} in attributes and text
-          const uuid = uuidv4();
-          const replacements = {
-            'uuid':  uuid,
-            'id':    'field-' + uuid,
-            'label': event.item.dataset.label,
-            'type':  event.item.dataset.type,
-          };
-          Replacer.tree(event.item, replacements);
-
-          // Set up the close button
-          event.item.setAttribute('id', 'item-' + uuid);
-          event.item.querySelector('button.btn-close').addEventListener('click', function(event) {
-            event.preventDefault();
-            const item = document.getElementById(event.target.dataset.target);
-            item.parentNode.removeChild(item);
-          });
-        },
+        onAdd: ClassFieldBuilder.addHandler,
       };
       Sortable.create(classFields, classFieldsOptions);
     </script>
