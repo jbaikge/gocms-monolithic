@@ -26,11 +26,13 @@ type Option struct {
 }
 
 type Field struct {
+	Type    string
 	Name    string
 	Label   string
-	Type    string
-	Options []Option
-	Fields  []Field
+	Min     string
+	Max     string
+	Step    string
+	Options string
 }
 
 type Class struct {

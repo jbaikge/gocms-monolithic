@@ -306,7 +306,7 @@
             data.label = type.label;
             data.type = type.type;
             data.template = type.template;
-            data.values = field.values;
+            data.values = field;
 
             const item = document.createElement('li');
             parent.appendChild(item);
@@ -402,10 +402,16 @@
       const classFieldDefinitions = [
         {
           type:  'text',
-          values: {
-            label: 'Test Label',
-            name:  'test_field',
-          },
+          label: 'Test Label',
+          name:  'test_field',
+        },
+        {
+          type:  'datetime-local',
+          label: 'Start Date',
+          name:  'start_date',
+          min:   '2000-01-01',
+          max:   '2032-01-01',
+          step:  '3600'
         },
       ];
 
