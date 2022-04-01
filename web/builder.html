@@ -82,10 +82,10 @@
           <div class="d-flex sortable-handle">::</div>
           <div class="flex-grow-1 mx-3 field-definition">
             <h2 class="fs-5">${label}</h2>
-            <input type="hidden" name="ids[]" value="${uuid}">
+            <input type="hidden" name="fields[]" value="${id}">
           </div>
           <div class="d-flex align-items-start">
-            <button type="button" class="btn btn-close" aria-label="Remove" data-target="item-${uuid}"></button>
+            <button type="button" class="btn btn-close" tabindex="-1" aria-label="Remove" data-target="item-${uuid}"></button>
           </div>
         </div>
       </template>
@@ -93,13 +93,13 @@
         <div class="row g-3">
           <div class="col-lg-6">
             <div class="form-floating">
-              <input type="text" id="${id}-label" class="form-control mb-3" name="label[${id}]" placeholder="Field Label" value="" required>
+              <input type="text" id="${id}-label" class="form-control mb-3" name="data[${id}][label]" placeholder="Field Label" value="" required>
               <label for="${id}-label">Field Label</label>
             </div>
           </div>
           <div class="col-lg-6">
             <div class="form-floating">
-              <input type="text" id="${id}-name" class="form-control mb-3" name="name[${id}]" placeholder="Field Name" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="" required>
+              <input type="text" id="${id}-name" class="form-control mb-3" name="data[${id}][name]" placeholder="Field Name" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="" required>
               <label for="${id}-name">Field Name</label>
             </div>
           </div>
@@ -109,19 +109,19 @@
         <div class="row g-3">
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="date" id="${id}-min" class="form-control mb-3" name="min[${id}]" placeholder="Min Date" value="">
+              <input type="date" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" placeholder="Min Date" value="">
               <label for="${id}-min">Min Date</label>
             </div>
           </div>
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="date" id="${id}-max" class="form-control mb-3" name="max[${id}]" placeholder="Max Date" value="">
+              <input type="date" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" placeholder="Max Date" value="">
               <label for="${id}-max">Max Date</label>
             </div>
           </div>
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="number" id="${id}-step" class="form-control mb-3" name="step[${id}]" min="0" placeholder="Step (seconds)" value="">
+              <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" placeholder="Step (seconds)" value="">
               <label for="${id}-step">Step (seconds)</label>
             </div>
           </div>
@@ -131,19 +131,19 @@
         <div class="row g-3">
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="time" id="${id}-min" class="form-control mb-3" name="min[${id}]" placeholder="Min Time" value="">
+              <input type="time" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" placeholder="Min Time" value="">
               <label for="${id}-min">Min Time</label>
             </div>
           </div>
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="time" id="${id}-max" class="form-control mb-3" name="max[${id}]" placeholder="Max Time" value="">
+              <input type="time" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" placeholder="Max Time" value="">
               <label for="${id}-max">Max Time</label>
             </div>
           </div>
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="number" id="${id}-step" class="form-control mb-3" name="step[${id}]" min="0" placeholder="Step (seconds)" value="">
+              <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" placeholder="Step (seconds)" value="">
               <label for="${id}-step">Step (seconds)</label>
             </div>
           </div>
@@ -153,19 +153,19 @@
         <div class="row g-3">
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="number" id="${id}-min" class="form-control mb-3" name="min[${id}]" placeholder="Min Number" value="">
+              <input type="number" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" placeholder="Min Number" value="">
               <label for="${id}-min">Min Number</label>
             </div>
           </div>
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="number" id="${id}-max" class="form-control mb-3" name="max[${id}]" placeholder="Max Number" value="">
+              <input type="number" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" placeholder="Max Number" value="">
               <label for="${id}-max">Max Number</label>
             </div>
           </div>
           <div class="col-lg-3">
             <div class="form-floating">
-              <input type="number" id="${id}-step" class="form-control mb-3" name="step[${id}]" min="0" placeholder="Step" value="">
+              <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" placeholder="Step" value="">
               <label for="${id}-step">Step</label>
             </div>
           </div>
@@ -175,7 +175,7 @@
         <div class="row g-3">
           <div class="col-lg-12">
             <div class="form-floating">
-              <textarea id="${id}-options" class="form-control mb-3" name="options[${id}]" placeholder="Options (one per line, key | value or just value)" style="height: 10em;"></textarea>
+              <textarea id="${id}-options" class="form-control mb-3" name="data[${id}][options]" placeholder="Options (one per line, key | value or just value)" style="height: 10em;"></textarea>
               <label for="${id}-options">Options (one per line, key | value or just value)</label>
             </div>
           </div>
