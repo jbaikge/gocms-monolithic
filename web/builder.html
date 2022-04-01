@@ -62,21 +62,13 @@
         </form>
       </article>
       <aside class="bg-dark text-secondary p-3">
-        <ul id="field-types" class="list-unstyled d-grid gap-3">
-          <li class="d-grid" data-template="date" data-type="date" data-label="Date"><button class="btn btn-secondary">Date</button></li>
-          <li class="d-grid" data-template="date" data-type="datetime-local" data-label="Date &amp; Time"><button class="btn btn-secondary">Date &amp; Time</button></li>
-          <li class="d-grid" data-template="email" data-type="email" data-label="Email"><button class="btn btn-secondary">Email</button></li>
-          <li class="d-grid" data-template="select" data-type="multiselect" data-label="Multi-Select"><button class="btn btn-secondary">Multi-Select</button></li>
-          <li class="d-grid" data-template="number" data-type="number" data-label="Number"><button class="btn btn-secondary">Number</button></li>
-          <li class="d-grid" data-template="select" data-type="select" data-label="Select"><button class="btn btn-secondary">Select</button></li>
-          <li class="d-grid" data-template="text" data-type="text" data-label="Text"><button class="btn btn-secondary">Text</button></li>
-          <li class="d-grid" data-template="textarea" data-type="textarea" data-label="Textarea"><button class="btn btn-secondary">Textarea</button></li>
-          <li class="d-grid" data-template="time" data-type="time" data-label="Time"><button class="btn btn-secondary">Time</button></li>
-          <li class="d-grid" data-template="tinymce" data-type="tinymce" data-label="TinyMCE"><button class="btn btn-secondary">TinyMCE</button></li>
-        </ul>
+        <ul id="field-types" class="list-unstyled d-grid gap-3"><!-- See FieldTypeBuilder for populating this --></ul>
       </aside>
     </main>
     <div id="templates">
+      <template id="field-type-template">
+        <li class="d-grid" data-template="${template}" data-type="${type}" data-label="${label}"><button class="btn btn-secondary">${label}</button></li>
+      </template>
       <template id="item-template">
         <div class="d-flex">
           <div class="d-flex sortable-handle">::</div>
@@ -223,7 +215,97 @@
       })('${', '}');
     </script>
     <script>
+      const FieldTypeBuilder = (function() {
+        'use strict';
+
+        const templateId = 'field-type-template';
+
+        const buildNode = function(definition) {
+          const template = document.getElementById(templateId);
+          if (template == null) {
+            console.error('Could not find template %s', templateId);
+            return document.createElement('li');
+          }
+
+          const node = template.content.cloneNode(true);
+          Replacer.tree(node, definition);
+          return node;
+        }
+
+        // Generates nodes from definitions array.
+        // Definitions array should contain objects with the keys:
+        // * type
+        // * template
+        // * label
+        const create = function(node, definitions) {
+          for (let i = 0; i < definitions.length; i++) {
+            const definition = definitions[i];
+            node.appendChild(buildNode(definition));
+          }
+        };
+
+        return {
+          create: create,
+        };
+      })()
+    </script>
+    <script>
+      const fieldTypeDefinitions = [
+        {
+          type:     'date',
+          template: 'date',
+          label:    'Date',
+        },
+        {
+          type:     'datetime-local',
+          template: 'date',
+          label:    'Date & Time',
+        },
+        {
+          type:     'email',
+          template: 'email',
+          label:    'Email',
+        },
+        {
+          type:     'multi-select',
+          template: 'select',
+          label:    'Multi-Select',
+        },
+        {
+          type:     'number',
+          template: 'number',
+          label:    'Number',
+        },
+        {
+          type:     'select',
+          template: 'select',
+          label:    'Select',
+        },
+        {
+          type:     'text',
+          template: 'text',
+          label:    'Text',
+        },
+        {
+          type:     'textarea',
+          template: 'textarea',
+          label:    'Textarea',
+        },
+        {
+          type:     'time',
+          template: 'time',
+          label:    'Time',
+        },
+        {
+          type:     'tinymce',
+          template: 'tinymce',
+          label:    'TinyMCE',
+        },
+      ];
+
       const fieldTypes = document.getElementById('field-types');
+      FieldTypeBuilder.create(fieldTypes, fieldTypeDefinitions);
+
       const fieldTypesOptions = {
         group: {
           name: 'field-types',
