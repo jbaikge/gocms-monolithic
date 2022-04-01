@@ -82,6 +82,7 @@
           <div class="d-flex sortable-handle">::</div>
           <div class="flex-grow-1 mx-3 field-definition">
             <h2 class="fs-5">${label}</h2>
+            <input type="hidden" name="types[]" value="${type}">
             <input type="hidden" name="fields[]" value="${id}">
           </div>
           <div class="d-flex align-items-start">
@@ -186,6 +187,42 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/uuid@latest/dist/umd/uuidv4.min.js"></script>
     <script>
+      const Replacer = (function(open, close) {
+        'use strict';
+
+        // Replaces all occurrences of keys wrapped in open and close tags with
+        // values from replacements object
+        const text = function(text, replacements) {
+          for (const key in replacements) {
+            const search = open + key + close;
+            text = text.replaceAll(search, replacements[key]);
+          }
+          return text;
+        };
+
+        // Walks the node tree and replaces all tags within text nodes as well
+        // as attributes
+        const tree = function(node, replacements) {
+          const walker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+          for (let current = walker.currentNode; current != null; current = walker.nextNode()) {
+            if (current.nodeType == Node.TEXT_NODE) {
+              current.textContent = this.text(current.textContent, replacements);
+            }
+            if (current.nodeType == Node.ELEMENT_NODE && current.hasAttributes()) {
+              for (let attr of current.attributes) {
+                attr.value = this.text(attr.value, replacements);
+              }
+            }
+          }
+        };
+
+        return {
+          text: text,
+          tree: tree,
+        };
+      })('${', '}');
+    </script>
+    <script>
       const fieldTypes = document.getElementById('field-types');
       const fieldTypesOptions = {
         group: {
@@ -228,20 +265,7 @@
             'label': event.item.dataset.label,
             'type':  event.item.dataset.type,
           };
-          const replacer = Replacer.create(replacements);
-
-          // Walk the nodes and their attributes to replace variables
-          const walker = document.createTreeWalker(event.item, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
-          for (let current = walker.currentNode; current != null; current = walker.nextNode()) {
-            if (current.nodeType == Node.TEXT_NODE) {
-              current.textContent = replacer.replace(current.textContent);
-            }
-            if (current.nodeType == Node.ELEMENT_NODE && current.hasAttributes()) {
-              for (let attr of current.attributes) {
-                attr.value = replacer.replace(attr.value);
-              }
-            }
-          }
+          Replacer.tree(event.item, replacements);
 
           // Set up the close button
           event.item.setAttribute('id', 'item-' + uuid);
@@ -253,26 +277,6 @@
         },
       };
       Sortable.create(classFields, classFieldsOptions);
-
-      const Replacer = (function() {
-        const create = function(replacements) {
-          const replace = function(text) {
-            for (let key in replacements) {
-              const search = '${' + key + '}';
-              text = text.replaceAll(search, replacements[key]);
-            }
-            return text;
-          };
-
-          return {
-            replace: replace,
-          };
-        };
-
-        return {
-          create: create,
-        }
-      })();
     </script>
   </body>
 </html>
