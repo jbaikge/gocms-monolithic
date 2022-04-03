@@ -77,92 +77,68 @@
       <template id="common-template">
         <div class="row g-3">
           <div class="col-lg-6">
-            <div class="form-floating">
-              <input type="text" id="${id}-label" class="form-control mb-3" name="data[${id}][label]" placeholder="Field Label" value="" required>
-              <label for="${id}-label">Field Label</label>
-            </div>
+            <label for="${id}-label">Field Label</label>
+            <input type="text" id="${id}-label" class="form-control mb-3" name="data[${id}][label]" value="" required>
           </div>
           <div class="col-lg-6">
-            <div class="form-floating">
-              <input type="text" id="${id}-name" class="form-control mb-3" name="data[${id}][name]" placeholder="Field Name" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="" required>
-              <label for="${id}-name">Field Name</label>
-            </div>
+            <label for="${id}-name">Field Name</label>
+            <input type="text" id="${id}-name" class="form-control mb-3" name="data[${id}][name]" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="" required>
           </div>
         </div>
       </template>
       <template id="date-template">
         <div class="row g-3">
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="date" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" placeholder="Min Date" value="">
-              <label for="${id}-min">Min Date</label>
-            </div>
+            <label for="${id}-min">Min Date</label>
+            <input type="date" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" value="">
           </div>
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="date" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" placeholder="Max Date" value="">
-              <label for="${id}-max">Max Date</label>
-            </div>
+            <label for="${id}-max">Max Date</label>
+            <input type="date" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" value="">
           </div>
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" placeholder="Step (seconds)" value="">
-              <label for="${id}-step">Step (seconds)</label>
-            </div>
+            <label for="${id}-step">Step (seconds)</label>
+            <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" value="">
           </div>
         </div>
       </template>
       <template id="time-template">
         <div class="row g-3">
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="time" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" placeholder="Min Time" value="">
-              <label for="${id}-min">Min Time</label>
-            </div>
+            <label for="${id}-min">Min Time</label>
+            <input type="time" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" value="">
           </div>
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="time" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" placeholder="Max Time" value="">
-              <label for="${id}-max">Max Time</label>
-            </div>
+            <label for="${id}-max">Max Time</label>
+            <input type="time" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" value="">
           </div>
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" placeholder="Step (seconds)" value="">
-              <label for="${id}-step">Step (seconds)</label>
-            </div>
+            <label for="${id}-step">Step (seconds)</label>
+            <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" value="">
           </div>
         </div>
       </template>
       <template id="number-template">
         <div class="row g-3">
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="number" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" placeholder="Min Number" value="">
-              <label for="${id}-min">Min Number</label>
-            </div>
+            <label for="${id}-min">Min Number</label>
+            <input type="number" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" value="">
           </div>
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="number" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" placeholder="Max Number" value="">
-              <label for="${id}-max">Max Number</label>
-            </div>
+            <label for="${id}-max">Max Number</label>
+            <input type="number" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" value="">
           </div>
           <div class="col-lg-3">
-            <div class="form-floating">
-              <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" placeholder="Step" value="">
-              <label for="${id}-step">Step</label>
-            </div>
+            <label for="${id}-step">Step</label>
+            <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" value="">
           </div>
         </div>
       </template>
       <template id="select-template">
         <div class="row g-3">
           <div class="col-lg-12">
-            <div class="form-floating">
-              <textarea id="${id}-options" class="form-control mb-3" name="data[${id}][options]" placeholder="Options (one per line, key | value or just value)" style="height: 10em;"></textarea>
-              <label for="${id}-options">Options (one per line, key | value or just value)</label>
-            </div>
+            <label for="${id}-options">Options (one per line, key | value or just value)</label>
+            <textarea id="${id}-options" class="form-control mb-3" name="data[${id}][options]" style="height: 10em;"></textarea>
           </div>
         </div>
       </template>
