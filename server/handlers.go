@@ -36,16 +36,16 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 	}
 	types := []fieldType{
 		{gocms.TypeDate, "Date", "date"},
-		{gocms.TypeDateTime, "date", "Date & Time"},
-		{gocms.TypeEmail, "email", "Email"},
-		{gocms.TypeMultiSelect, "select", "Multi-Select"},
-		{gocms.TypeNumber, "number", "Number"},
-		{gocms.TypeSelect, "select", "Select"},
-		{gocms.TypeText, "text", "Text"},
-		{gocms.TypeTextArea, "textarea", "Textarea"},
-		{gocms.TypeTime, "time", "Time"},
-		{gocms.TypeTinyMCE, "tinymce", "TinyMCE"},
-		{gocms.TypeUpload, "upload", "Upload"},
+		{gocms.TypeDateTime, "Date & Time", "date"},
+		{gocms.TypeEmail, "Email", "email"},
+		{gocms.TypeMultiSelect, "Multi-Select", "select"},
+		{gocms.TypeNumber, "Number", "number"},
+		{gocms.TypeSelect, "Select", "select"},
+		{gocms.TypeText, "Text", "text"},
+		{gocms.TypeTextArea, "Textarea", "textarea"},
+		{gocms.TypeTime, "Time", "time"},
+		{gocms.TypeTinyMCE, "TinyMCE", "tinymce"},
+		{gocms.TypeUpload, "Upload", "upload"},
 	}
 
 	return func(ctx *gin.Context) {
