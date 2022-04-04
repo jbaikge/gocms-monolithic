@@ -30,3 +30,33 @@ type ClassService interface {
 	Insert(*Class) error
 	Update(*Class) error
 }
+
+type classService struct {
+	repo ClassRepository
+}
+
+func NewClassService(repo ClassRepository) ClassService {
+	return classService{
+		repo: repo,
+	}
+}
+
+func (s classService) Delete(class Class) error {
+	return s.repo.DeleteClass(class.Id)
+}
+
+func (s classService) GetById(id primitive.ObjectID) (Class, error) {
+	return s.repo.GetClassById(id)
+}
+
+func (s classService) GetBySlug(slug string) (Class, error) {
+	return s.repo.GetClassBySlug(slug)
+}
+
+func (s classService) Insert(class *Class) error {
+	return s.repo.InsertClass(class)
+}
+
+func (s classService) Update(class *Class) error {
+	return s.repo.UpdateClass(class)
+}
