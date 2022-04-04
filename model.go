@@ -12,35 +12,31 @@ const (
 	TypeEmail       = "email"
 	TypeMultiSelect = "multiselect"
 	TypeNumber      = "number"
-	TypeSection     = "section"
+	TypeSelect      = "select"
 	TypeText        = "text"
 	TypeTextArea    = "textarea"
 	TypeTime        = "time"
 	TypeTinyMCE     = "tinymce"
+	TypeUpload      = "upload"
 )
 
-type Option struct {
-	Value    string
-	Label    string
-	Selected bool
-}
-
 type Field struct {
-	Type    string
-	Name    string
-	Label   string
-	Min     string
-	Max     string
-	Step    string
-	Options string
+	Type    string `json:"type"`
+	Name    string `json:"name"`
+	Label   string `json:"label"`
+	Min     string `json:"min"`
+	Max     string `json:"max"`
+	Step    string `json:"step"`
+	Options string `json:"options"`
 }
 
 type Class struct {
-	Id      primitive.ObjectID `bson:"_id,omitempty"`
-	Slug    string
-	Created time.Time
-	Updated time.Time
-	Fields  []Field
+	Id      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
+	Name    string             `json:"name"`
+	Slug    string             `json:"slug"`
+	Created time.Time          `json:"created"`
+	Updated time.Time          `json:"updated"`
+	Fields  []Field            `json:"fields"`
 }
 
 type Document struct {
