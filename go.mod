@@ -3,6 +3,7 @@ module github.com/jbaikge/gocms
 go 1.18
 
 require (
+	github.com/gin-contrib/multitemplate v0.0.0-20220323084503-710510e67c20
 	github.com/gin-gonic/gin v1.7.7
 	github.com/zeebo/assert v1.3.0
 	go.mongodb.org/mongo-driver v1.8.4
