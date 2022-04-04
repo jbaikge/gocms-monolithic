@@ -87,14 +87,6 @@ func (m mongoRepository) DeleteDocument(id primitive.ObjectID) (err error) {
 func (m mongoRepository) GetDocumentById(id primitive.ObjectID) (doc gocms.Document, err error) {
 	filter := bson.M{"_id": id}
 	err = m.documents.FindOne(m.context, filter).Decode(&doc)
-	if err != nil {
-		return
-	}
-	class, err := m.GetClassById(doc.ClassId)
-	if err != nil {
-		return
-	}
-	doc.Class = class
 	return
 }
 
