@@ -14,3 +14,19 @@ type Class struct {
 	Updated time.Time          `json:"updated"`
 	Fields  []Field            `json:"fields"`
 }
+
+type ClassRepository interface {
+	DeleteClass(primitive.ObjectID) error
+	GetClassById(primitive.ObjectID) (Class, error)
+	GetClassBySlug(string) (Class, error)
+	InsertClass(*Class) error
+	UpdateClass(*Class) error
+}
+
+type ClassService interface {
+	Delete(Class) error
+	GetById(primitive.ObjectID) (Class, error)
+	GetBySlug(string) (Class, error)
+	Insert(*Class) error
+	Update(*Class) error
+}

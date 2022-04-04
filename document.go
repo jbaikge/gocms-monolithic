@@ -16,3 +16,10 @@ type Document struct {
 	Class     Class `bson:"-"`
 	Values    map[string]interface{}
 }
+
+type DocumentRepository interface {
+	DeleteDocument(primitive.ObjectID) error
+	GetDocumentById(primitive.ObjectID) (Document, error)
+	InsertDocument(*Document) error
+	UpdateDocument(*Document) error
+}

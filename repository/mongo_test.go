@@ -45,7 +45,7 @@ func TestMongo(t *testing.T) {
 			}
 			assert.NoError(t, repo.InsertClass(&class))
 
-			check, err := repo.GetClass(class.Id)
+			check, err := repo.GetClassById(class.Id)
 			assert.NoError(t, err)
 			assert.Equal(t, class.Slug, check.Slug)
 		})
@@ -61,7 +61,7 @@ func TestMongo(t *testing.T) {
 			assert.NoError(t, repo.UpdateClass(&class))
 			assert.True(t, updated.Before(class.Updated))
 
-			check, err := repo.GetClass(class.Id)
+			check, err := repo.GetClassById(class.Id)
 			assert.NoError(t, err)
 			assert.Equal(t, class.Slug, check.Slug)
 		})
@@ -70,7 +70,7 @@ func TestMongo(t *testing.T) {
 			class := gocms.Class{}
 			assert.NoError(t, repo.InsertClass(&class))
 			assert.NoError(t, repo.DeleteClass(class.Id))
-			_, err := repo.GetClass(class.Id)
+			_, err := repo.GetClassById(class.Id)
 			// Make sure a "no documents in result" error pops out
 			assert.Error(t, err)
 		})
@@ -100,10 +100,9 @@ func TestMongo(t *testing.T) {
 			}
 			assert.NoError(t, repo.InsertDocument(&doc))
 
-			check, err := repo.GetDocument(doc.Id)
+			check, err := repo.GetDocumentById(doc.Id)
 			assert.NoError(t, err)
 			assert.Equal(t, doc.ClassId, check.ClassId)
-			assert.Equal(t, check.Class.Id, class.Id)
 		})
 
 		t.Run("Update", func(t *testing.T) {
@@ -118,7 +117,7 @@ func TestMongo(t *testing.T) {
 			assert.NoError(t, repo.UpdateDocument(&doc))
 			assert.True(t, updated.Before(doc.Updated))
 
-			check, err := repo.GetDocument(doc.Id)
+			check, err := repo.GetDocumentById(doc.Id)
 			assert.NoError(t, err)
 			assert.Equal(t, doc.Slug, check.Slug)
 		})
@@ -128,7 +127,7 @@ func TestMongo(t *testing.T) {
 			assert.NoError(t, repo.InsertDocument(&doc))
 			assert.NoError(t, repo.DeleteDocument(doc.Id))
 
-			_, err := repo.GetDocument(doc.Id)
+			_, err := repo.GetDocumentById(doc.Id)
 			assert.Error(t, err)
 		})
 	})

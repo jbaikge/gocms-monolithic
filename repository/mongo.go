@@ -37,8 +37,14 @@ func (m mongoRepository) DeleteClass(id primitive.ObjectID) (err error) {
 	return
 }
 
-func (m mongoRepository) GetClass(id primitive.ObjectID) (class gocms.Class, err error) {
+func (m mongoRepository) GetClassById(id primitive.ObjectID) (class gocms.Class, err error) {
 	filter := bson.M{"_id": id}
+	err = m.classes.FindOne(m.context, filter).Decode(&class)
+	return
+}
+
+func (m mongoRepository) GetClassBySlug(slug string) (class gocms.Class, err error) {
+	filter := bson.M{"slug": slug}
 	err = m.classes.FindOne(m.context, filter).Decode(&class)
 	return
 }
@@ -78,13 +84,13 @@ func (m mongoRepository) DeleteDocument(id primitive.ObjectID) (err error) {
 	return
 }
 
-func (m mongoRepository) GetDocument(id primitive.ObjectID) (doc gocms.Document, err error) {
+func (m mongoRepository) GetDocumentById(id primitive.ObjectID) (doc gocms.Document, err error) {
 	filter := bson.M{"_id": id}
 	err = m.documents.FindOne(m.context, filter).Decode(&doc)
 	if err != nil {
 		return
 	}
-	class, err := m.GetClass(doc.ClassId)
+	class, err := m.GetClassById(doc.ClassId)
 	if err != nil {
 		return
 	}
