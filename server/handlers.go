@@ -35,61 +35,17 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 		Template string `json:"template"`
 	}
 	types := []fieldType{
-		{
-			Type:     gocms.TypeDate,
-			Label:    "Date",
-			Template: "date",
-		},
-		{
-			Type:     gocms.TypeDateTime,
-			Template: "date",
-			Label:    "Date & Time",
-		},
-		{
-			Type:     gocms.TypeEmail,
-			Template: "email",
-			Label:    "Email",
-		},
-		{
-			Type:     gocms.TypeMultiSelect,
-			Template: "select",
-			Label:    "Multi-Select",
-		},
-		{
-			Type:     gocms.TypeNumber,
-			Template: "number",
-			Label:    "Number",
-		},
-		{
-			Type:     gocms.TypeSelect,
-			Template: "select",
-			Label:    "Select",
-		},
-		{
-			Type:     gocms.TypeText,
-			Template: "text",
-			Label:    "Text",
-		},
-		{
-			Type:     gocms.TypeTextArea,
-			Template: "textarea",
-			Label:    "Textarea",
-		},
-		{
-			Type:     gocms.TypeTime,
-			Template: "time",
-			Label:    "Time",
-		},
-		{
-			Type:     gocms.TypeTinyMCE,
-			Template: "tinymce",
-			Label:    "TinyMCE",
-		},
-		{
-			Type:     gocms.TypeUpload,
-			Template: "upload",
-			Label:    "Upload",
-		},
+		{gocms.TypeDate, "Date", "date"},
+		{gocms.TypeDateTime, "date", "Date & Time"},
+		{gocms.TypeEmail, "email", "Email"},
+		{gocms.TypeMultiSelect, "select", "Multi-Select"},
+		{gocms.TypeNumber, "number", "Number"},
+		{gocms.TypeSelect, "select", "Select"},
+		{gocms.TypeText, "text", "Text"},
+		{gocms.TypeTextArea, "textarea", "Textarea"},
+		{gocms.TypeTime, "time", "Time"},
+		{gocms.TypeTinyMCE, "tinymce", "TinyMCE"},
+		{gocms.TypeUpload, "upload", "Upload"},
 	}
 
 	return func(ctx *gin.Context) {
