@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"net/http"
 	"path/filepath"
 
@@ -17,7 +18,15 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 	)
 
 	return func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, name, gin.H{})
+		var class gocms.Class
+		log.Printf("Request Method: %s", ctx.Request.Method)
+		if err := ctx.ShouldBind(&class); err != nil {
+			log.Print(err)
+		}
+		log.Printf("After bind: %+v", class)
+		ctx.HTML(http.StatusOK, name, gin.H{
+			"Class": class,
+		})
 	}
 }
 
@@ -49,9 +58,10 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 	}
 
 	return func(ctx *gin.Context) {
+		var class gocms.Class
 		ctx.HTML(http.StatusOK, name, gin.H{
 			"FieldTypes":  types,
-			"ClassFields": []gocms.Field{},
+			"ClassFields": class.Fields,
 		})
 	}
 }
