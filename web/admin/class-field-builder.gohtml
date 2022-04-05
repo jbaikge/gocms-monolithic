@@ -301,7 +301,7 @@
   const fieldTypeDefinitions = {{ .FieldTypes }};
 
   // This will rebuild the field list for editing purposes
-  const classFieldDefinitions = {{ .ClassFields }};
+  const classFieldDefinitions = {{ .Class.Fields }} || [];
 
   // Initialize field type buttons
   const fieldTypes = document.getElementById('field-types');
