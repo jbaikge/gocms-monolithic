@@ -86,15 +86,10 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 
 func (s *Server) HandleNavBar() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		all := []gocms.Class{
-			{
-				Name: "Banana",
-				Slug: "banana",
-			},
-			{
-				Name: "Orange",
-				Slug: "orange",
-			},
+		all, err := s.classService.All()
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 		c.Set("classList", all)
 		c.Next()
