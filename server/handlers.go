@@ -48,12 +48,11 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 		filepath.Join(s.templatePath, "admin", "class-field-builder.gohtml"),
 	)
 
-	type fieldType struct {
+	types := []struct {
 		Type     string `json:"type"`
 		Label    string `json:"label"`
 		Template string `json:"template"`
-	}
-	types := []fieldType{
+	}{
 		{gocms.TypeDate, "Date", "date"},
 		{gocms.TypeDateTime, "Date & Time", "date"},
 		{gocms.TypeEmail, "Email", "email"},
@@ -70,8 +69,8 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var class gocms.Class
 		ctx.HTML(http.StatusOK, name, gin.H{
-			"FieldTypes":  types,
-			"ClassFields": class.Fields,
+			"FieldTypes": types,
+			"Class":      class,
 		})
 	}
 }
