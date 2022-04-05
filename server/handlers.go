@@ -2,7 +2,6 @@ package server
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"path/filepath"
 
@@ -22,13 +21,34 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 		var class gocms.Class
 		var err error
 
-		if err := c.Bind(&class); err != nil {
-			log.Print(err)
+		// Pull the class by the slug to edit it
+		if slug := c.Param("slug"); slug != "" {
+			class, err = s.classService.GetBySlug(slug)
+			if err != nil {
+				c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
 		}
+
 		if c.Request.Method == http.MethodPost {
-			err = s.classService.Insert(&class)
+			// Bind form values where defined
+			if err := c.Bind(&class); err != nil {
+				c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+
+			// Insert or update depending on the state of class.Id
+			var newUrl string
+			if class.Id.IsZero() {
+				newUrl = fmt.Sprintf("/admin/classes/%s/fields", class.Slug)
+				err = s.classService.Insert(&class)
+			} else {
+				newUrl = fmt.Sprintf("/admin/classes/%s", class.Slug)
+				err = s.classService.Update(&class)
+			}
+
+			// If all went well, bounce to the next page
 			if err == nil {
-				newUrl := fmt.Sprintf("/admin/classes/%s/fields", class.Slug)
 				c.Redirect(http.StatusTemporaryRedirect, newUrl)
 				return
 			}
