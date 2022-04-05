@@ -18,22 +18,22 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 		filepath.Join(s.templatePath, "admin", "class-builder.gohtml"),
 	)
 
-	return func(ctx *gin.Context) {
+	return func(c *gin.Context) {
 		var class gocms.Class
 		var err error
 
-		if err := ctx.Bind(&class); err != nil {
+		if err := c.Bind(&class); err != nil {
 			log.Print(err)
 		}
-		if ctx.Request.Method == http.MethodPost {
+		if c.Request.Method == http.MethodPost {
 			err = s.classService.Insert(&class)
 			if err == nil {
 				newUrl := fmt.Sprintf("/admin/classes/%s/fields", class.Slug)
-				ctx.Redirect(http.StatusTemporaryRedirect, newUrl)
+				c.Redirect(http.StatusTemporaryRedirect, newUrl)
 				return
 			}
 		}
-		ctx.HTML(http.StatusOK, name, gin.H{
+		c.HTML(http.StatusOK, name, gin.H{
 			"Class": class,
 			"Error": err,
 		})
@@ -66,9 +66,9 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 		{gocms.TypeUpload, "Upload", "upload"},
 	}
 
-	return func(ctx *gin.Context) {
+	return func(c *gin.Context) {
 		var class gocms.Class
-		ctx.HTML(http.StatusOK, name, gin.H{
+		c.HTML(http.StatusOK, name, gin.H{
 			"FieldTypes": types,
 			"Class":      class,
 		})
