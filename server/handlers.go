@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -19,13 +20,22 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 
 	return func(ctx *gin.Context) {
 		var class gocms.Class
-		log.Printf("Request Method: %s", ctx.Request.Method)
-		if err := ctx.ShouldBind(&class); err != nil {
+		var err error
+
+		if err := ctx.Bind(&class); err != nil {
 			log.Print(err)
 		}
-		log.Printf("After bind: %+v", class)
+		if ctx.Request.Method == http.MethodPost {
+			err = s.classService.Insert(&class)
+			if err == nil {
+				newUrl := fmt.Sprintf("/admin/classes/%s/fields", class.Slug)
+				ctx.Redirect(http.StatusTemporaryRedirect, newUrl)
+				return
+			}
+		}
 		ctx.HTML(http.StatusOK, name, gin.H{
 			"Class": class,
+			"Error": err,
 		})
 	}
 }
