@@ -21,8 +21,8 @@
 {{ end }}
 
 {{ define "content" }}
-<h1 class="fs-2 mb-3">Class Fields</h1>
-<form method="post">
+<h1 class="fs-2 mb-3">{{ .Class.Name }} Fields</h1>
+<form method="post" action="/admin/classes/{{ .Class.Slug }}/fields">
   <ul id="class-fields" class="list-unstyled d-grid gap-3 class-fields"><!-- No spaces so :empty triggers --></ul>
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
