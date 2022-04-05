@@ -47,9 +47,13 @@ func TestMongo(t *testing.T) {
 			}
 			assert.NoError(t, repo.InsertClass(&class))
 
-			check, err := repo.GetClassById(class.Id)
+			idCheck, err := repo.GetClassById(class.Id)
 			assert.NoError(t, err)
-			assert.Equal(t, class.Slug, check.Slug)
+			assert.Equal(t, class.Slug, idCheck.Slug)
+
+			slugCheck, err := repo.GetClassBySlug(class.Slug)
+			assert.NoError(t, err)
+			assert.Equal(t, class.Slug, slugCheck.Slug)
 		})
 
 		t.Run("Update", func(t *testing.T) {
