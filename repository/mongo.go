@@ -37,6 +37,15 @@ func (m mongoRepository) DeleteClass(id primitive.ObjectID) (err error) {
 	return
 }
 
+func (m mongoRepository) GetAllClasses() (classes []gocms.Class, err error) {
+	cursor, err := m.classes.Find(m.context, bson.M{})
+	if err != nil {
+		return
+	}
+	err = cursor.All(m.context, &classes)
+	return
+}
+
 func (m mongoRepository) GetClassById(id primitive.ObjectID) (class gocms.Class, err error) {
 	filter := bson.M{"_id": id}
 	err = m.classes.FindOne(m.context, filter).Decode(&class)

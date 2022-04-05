@@ -17,6 +17,7 @@ type Class struct {
 
 type ClassRepository interface {
 	DeleteClass(primitive.ObjectID) error
+	GetAllClasses() ([]Class, error)
 	GetClassById(primitive.ObjectID) (Class, error)
 	GetClassBySlug(string) (Class, error)
 	InsertClass(*Class) error
@@ -24,6 +25,7 @@ type ClassRepository interface {
 }
 
 type ClassService interface {
+	All() ([]Class, error)
 	Delete(Class) error
 	GetById(primitive.ObjectID) (Class, error)
 	GetBySlug(string) (Class, error)
@@ -39,6 +41,10 @@ func NewClassService(repo ClassRepository) ClassService {
 	return classService{
 		repo: repo,
 	}
+}
+
+func (s classService) All() ([]Class, error) {
+	return s.repo.GetAllClasses()
 }
 
 func (s classService) Delete(class Class) error {
