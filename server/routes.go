@@ -12,6 +12,7 @@ func (s *Server) Routes() *gin.Engine {
 	// router.POST("/forms/:id", s.HandleForm())
 
 	admin := router.Group("/admin")
+	admin.Use(s.HandleNavBar())
 	{
 		classes := admin.Group("/classes")
 		{

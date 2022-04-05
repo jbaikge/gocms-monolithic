@@ -18,7 +18,7 @@
   <body>
     <main class="d-lg-flex">
       <aside class="text-light bg-dark p-3">
-        <div>GoCMS</div>
+        <div class="fs-2">GoCMS</div>
         <nav>
           <ul class="list-unstyled">
             <li>
@@ -27,6 +27,15 @@
                 <li><a href="/admin/classes/new" class="link-secondary">New Class</a></li>
               </ul>
             </li>
+            {{ range .ClassList }}
+            <li>
+              <a href="#" class="link-primary align-items-center collapsed" data-bs-toggle="collapse" data-bs-target="#{{ .Slug }}-collapse" aria-expanded="true">{{ .Name }}</a>
+              <ul class="list-unstyled small collapse ps-3" id="{{ .Slug }}-collapse">
+                <li><a href="/admin/classes/{{ .Slug }}/edit" class="link-secondary">Edit</a></li>
+                <li><a href="/admin/classes/{{ .Slug }}/fields" class="link-secondary">Fields</a></li>
+              </ul>
+            </li>
+            {{ end }}
           </ul>
         </nav>
       </aside>

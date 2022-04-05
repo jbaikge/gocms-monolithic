@@ -33,10 +33,15 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 				return
 			}
 		}
-		c.HTML(http.StatusOK, name, gin.H{
+
+		obj := gin.H{
 			"Class": class,
 			"Error": err,
-		})
+		}
+		if list, ok := c.Get("classList"); ok {
+			obj["ClassList"] = list
+		}
+		c.HTML(http.StatusOK, name, obj)
 	}
 }
 
@@ -68,9 +73,30 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var class gocms.Class
-		c.HTML(http.StatusOK, name, gin.H{
+		obj := gin.H{
 			"FieldTypes": types,
 			"Class":      class,
-		})
+		}
+		if list, ok := c.Get("classList"); ok {
+			obj["ClassList"] = list
+		}
+		c.HTML(http.StatusOK, name, obj)
+	}
+}
+
+func (s *Server) HandleNavBar() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		all := []gocms.Class{
+			{
+				Name: "Banana",
+				Slug: "banana",
+			},
+			{
+				Name: "Orange",
+				Slug: "orange",
+			},
+		}
+		c.Set("classList", all)
+		c.Next()
 	}
 }
