@@ -3,6 +3,9 @@
 
 {{ define "content" }}
 <h1 class="fs-2 mb-3">Class Definition</h1>
+{{ if .Error }}
+<div class="alert alert-danger"><strong>Error:</strong> {{ .Error }}</div>
+{{ end }}
 <form method="post">
   <div class="row g-3">
     <div class="col-lg-6 mb-3">
