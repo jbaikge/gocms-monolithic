@@ -10,7 +10,7 @@ import (
 )
 
 func (s *Server) HandleClassBuilder() gin.HandlerFunc {
-	name := "class-builder"
+	name := "admin-class-builder"
 	s.renderer.AddFromFiles(
 		name,
 		filepath.Join(s.templatePath, "admin", "base.gohtml"),
@@ -49,7 +49,7 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 
 			// If all went well, bounce to the next page
 			if err == nil {
-				c.Redirect(http.StatusTemporaryRedirect, newUrl)
+				c.Redirect(http.StatusSeeOther, newUrl)
 				return
 			}
 		}
@@ -66,7 +66,7 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 }
 
 func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
-	name := "class-field-builder"
+	name := "admin-class-field-builder"
 	s.renderer.AddFromFiles(
 		name,
 		filepath.Join(s.templatePath, "admin", "base.gohtml"),
@@ -96,6 +96,38 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 		obj := gin.H{
 			"FieldTypes": types,
 			"Class":      class,
+		}
+		if list, ok := c.Get("classList"); ok {
+			obj["ClassList"] = list
+		}
+		c.HTML(http.StatusOK, name, obj)
+	}
+}
+
+func (s *Server) HandleClassIndex() gin.HandlerFunc {
+	name := "admin-class-index"
+	s.renderer.AddFromFiles(
+		name,
+		filepath.Join(s.templatePath, "admin", "base.gohtml"),
+		filepath.Join(s.templatePath, "admin", "class.gohtml"),
+	)
+	return func(c *gin.Context) {
+		var class gocms.Class
+
+		slug := c.Param("slug")
+		if slug == "" {
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		class, err := s.classService.GetBySlug(slug)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		obj := gin.H{
+			"Class": class,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list

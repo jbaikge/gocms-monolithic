@@ -1,0 +1,24 @@
+{{ define "head" }}
+{{ end }}
+
+{{ define "content" }}
+<h1 class="fs-2 mb-3">{{ .Class.Name }} Details</h1>
+<dl>
+  <dt>ID</dt>
+  <dd>{{ .Class.Id.Hex }}</dd>
+  <dt>Name</dt>
+  <dd>{{ .Class.Name }}</dd>
+  <dt>Slug</dt>
+  <dd>{{ .Class.Slug }}</dd>
+  <dt>Created</dt>
+  <dd>{{ .Class.Created.Local.Format "Jan 2, 2006 at 3:04 pm" }}</dd>
+  <dt>Last Update</dt>
+  <dd>{{ .Class.Updated.Local.Format "Jan 2, 2006 at 3:04 pm" }}</dd>
+</dl>
+{{ end }}
+
+{{ define "sidebar" }}
+{{ end }}
+
+{{ define "footer" }}
+{{ end }}
