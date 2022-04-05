@@ -4,12 +4,12 @@
 {{ define "content" }}
 <h1 class="fs-2 mb-3">Class Definition</h1>
 <form method="post">
-  <div class="row">
-    <div class="col-lg-6">
+  <div class="row g-3">
+    <div class="col-lg-6 mb-3">
       <label for="name">Class Name</label>
       <input type="text" id="name" name="name" class="form-control" value="{{ .Class.Name }}">
     </div>
-    <div class="col-lg-6">
+    <div class="col-lg-6 mb-3">
       <label for="slug">Slug</label>
       <input type="text" id="slug" name="slug" class="form-control" pattern="[a-z0-9_]+" value="{{ .Class.Slug }}">
     </div>
@@ -19,9 +19,6 @@
 {{ end }}
 
 {{ define "sidebar" }}
-<aside class="bg-dark text-secondary p-3">
-  <ul id="field-types" class="list-unstyled d-grid gap-3"><!-- See FieldTypeBuilder for populating this --></ul>
-</aside>
 {{ end }}
 
 {{ define "footer" }}
