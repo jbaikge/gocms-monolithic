@@ -54,6 +54,9 @@ func (m mongoRepository) InsertClass(class *gocms.Class) (err error) {
 	class.Created = now
 	class.Updated = now
 	result, err := m.classes.InsertOne(m.context, class)
+	if err != nil {
+		return
+	}
 	id, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
 		return errors.New("Unable to cast newly inserted Class ID to ObjectID")
