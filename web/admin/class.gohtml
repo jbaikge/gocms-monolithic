@@ -14,6 +14,10 @@
   <dd>{{ .Class.Created.Local.Format "Jan 2, 2006 at 3:04 pm" }}</dd>
   <dt>Last Update</dt>
   <dd>{{ .Class.Updated.Local.Format "Jan 2, 2006 at 3:04 pm" }}</dd>
+  <dt>Fields</dt>
+  {{ range .Class.Fields }}
+  <dd>{{ .Label }} ({{ .Type }})</dd>
+  {{ end }}
 </dl>
 {{ end }}
 
