@@ -65,7 +65,7 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 	}
 }
 
-func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
+func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 	name := "admin-class-field-builder"
 	s.renderer.AddFromFiles(
 		name,
@@ -91,16 +91,67 @@ func (s *Server) HandleClassFieldBuilder() gin.HandlerFunc {
 		{gocms.TypeUpload, "Upload", "upload"},
 	}
 
+	type postData struct {
+		Fields []gocms.Field `form:"fields" json:"fields"`
+	}
+
 	return func(c *gin.Context) {
 		var class gocms.Class
+		var err error
+
+		if class, err = s.classService.GetBySlug(c.Param("slug")); err != nil {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+
 		obj := gin.H{
 			"FieldTypes": types,
 			"Class":      class,
+			"Error":      err,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
 		}
 		c.HTML(http.StatusOK, name, obj)
+	}
+}
+
+func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
+	type postData struct {
+		Fields []gocms.Field
+	}
+
+	return func(c *gin.Context) {
+		var class gocms.Class
+		slug := c.Param("slug")
+		class, err := s.classService.GetBySlug(slug)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"error":   "Class with slug, " + slug + ", not found",
+			})
+			return
+		}
+
+		var post postData
+		if err := c.Bind(&post); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		class.Fields = post.Fields
+		if err := s.classService.Update(&class); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusAccepted, gin.H{"success": true})
 	}
 }
 
@@ -116,13 +167,13 @@ func (s *Server) HandleClassIndex() gin.HandlerFunc {
 
 		slug := c.Param("slug")
 		if slug == "" {
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithStatus(http.StatusNotFound)
 			return
 		}
 
 		class, err := s.classService.GetBySlug(slug)
 		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
+			c.AbortWithError(http.StatusNotFound, err)
 			return
 		}
 

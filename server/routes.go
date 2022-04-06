@@ -23,8 +23,8 @@ func (s *Server) Routes() *gin.Engine {
 				class.GET("/", s.HandleClassIndex())
 				class.GET("/edit", s.HandleClassBuilder())
 				class.POST("/edit", s.HandleClassBuilder())
-				class.GET("/fields", s.HandleClassFieldBuilder())
-				class.POST("/fields", s.HandleClassFieldBuilder())
+				class.GET("/fields", s.HandleClassFieldBuilderGet())
+				class.POST("/fields", s.HandleClassFieldBuilderPost())
 			}
 		}
 		// forms := admin.Group("/forms")
