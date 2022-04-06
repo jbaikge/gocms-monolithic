@@ -7,6 +7,7 @@ import (
 
 	"github.com/jbaikge/gocms"
 	"github.com/zeebo/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -89,6 +90,17 @@ func TestMongo(t *testing.T) {
 			check, err := repo.GetClassById(class.Id)
 			assert.NoError(t, err)
 			assert.Equal(t, class.Slug, check.Slug)
+		})
+
+		t.Run("Update Not Found", func(t *testing.T) {
+			class := gocms.Class{
+				Slug: "update_not_found",
+			}
+			assert.NoError(t, repo.InsertClass(&class))
+
+			class.Id = primitive.NewObjectID()
+			class.Slug = "should_not_work"
+			assert.Error(t, repo.UpdateClass(&class))
 		})
 
 		t.Run("Delete", func(t *testing.T) {
