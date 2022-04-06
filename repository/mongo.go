@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type mongoRepository struct {
@@ -38,7 +39,11 @@ func (m mongoRepository) DeleteClass(id primitive.ObjectID) (err error) {
 }
 
 func (m mongoRepository) GetAllClasses() (classes []gocms.Class, err error) {
-	cursor, err := m.classes.Find(m.context, bson.M{})
+	filter := bson.D{}
+	sort := bson.D{bson.E{Key: "name", Value: 1}}
+	opts := options.Find().SetSort(sort)
+
+	cursor, err := m.classes.Find(m.context, filter, opts)
 	if err != nil {
 		return
 	}
