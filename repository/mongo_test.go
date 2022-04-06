@@ -1,5 +1,3 @@
-//go:build e2e
-
 package repository
 
 import (
@@ -24,13 +22,34 @@ func TestMongo(t *testing.T) {
 	assert.NoError(t, err)
 
 	db := client.Database("testing")
-	t.Cleanup(func() {
-		db.Drop(ctx)
-	})
+	// Clean out db before messing with it
+	assert.NoError(t, db.Drop(ctx))
 
 	repo := NewMongo(ctx, db)
 
 	t.Run("Class", func(t *testing.T) {
+		t.Run("All", func(t *testing.T) {
+			// need a clean collection
+			assert.NoError(t, db.Collection("classes").Drop(ctx))
+			classes := []gocms.Class{
+				{Name: "Event", Slug: "event"},
+				{Name: "Blog", Slug: "blog"},
+				{Name: "News", Slug: "news"},
+			}
+			for _, class := range classes {
+				assert.NoError(t, repo.InsertClass(&class))
+			}
+
+			all, err := repo.GetAllClasses()
+			assert.NoError(t, err)
+			assert.Equal(t, len(all), len(classes))
+
+			expectSlugs := []string{"blog", "event", "news"}
+			for i := range all {
+				assert.Equal(t, all[i].Slug, expectSlugs[i])
+			}
+		})
+
 		t.Run("Create", func(t *testing.T) {
 			class := gocms.Class{
 				Slug: "create_test",

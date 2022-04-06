@@ -31,9 +31,6 @@ func NewMongo(ctx context.Context, db *mongo.Database) Repository {
 func (m mongoRepository) DeleteClass(id primitive.ObjectID) (err error) {
 	filter := bson.M{"_id": id}
 	_, err = m.classes.DeleteOne(m.context, filter)
-	if err != nil {
-		return
-	}
 	// Can include a check for the result and DeletedCount later if it is useful
 	return
 }
@@ -95,9 +92,6 @@ func (m mongoRepository) UpdateClass(class *gocms.Class) (err error) {
 func (m mongoRepository) DeleteDocument(id primitive.ObjectID) (err error) {
 	filter := bson.M{"_id": id}
 	_, err = m.documents.DeleteOne(m.context, filter)
-	if err != nil {
-		return
-	}
 	return
 }
 
