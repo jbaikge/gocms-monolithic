@@ -22,7 +22,7 @@
 
 {{ define "content" }}
 <h1 class="fs-2 mb-3">{{ .Class.Name }} Fields</h1>
-<form method="post" action="/admin/classes/{{ .Class.Slug }}/fields">
+<form id="field-form" method="post" action="/admin/classes/{{ .Class.Slug }}/fields">
   <ul id="class-fields" class="list-unstyled d-grid gap-3 class-fields"><!-- No spaces so :empty triggers --></ul>
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
@@ -44,8 +44,7 @@
       <div class="d-flex sortable-handle">::</div>
       <div class="flex-grow-1 mx-3 field-definition">
         <h2 class="fs-5">${label}</h2>
-        <input type="hidden" name="data[${id}][type]" value="${type}">
-        <input type="hidden" name="fields[]" value="${id}">
+        <input type="hidden" name="type" value="${type}">
       </div>
       <div class="d-flex align-items-start">
         <button type="button" class="btn btn-close" tabindex="-1" aria-label="Remove" data-target="item-${uuid}"></button>
@@ -56,11 +55,11 @@
     <div class="row g-3">
       <div class="col-lg-6">
         <label for="${id}-label">Field Label</label>
-        <input type="text" id="${id}-label" class="form-control mb-3" name="data[${id}][label]" value="" required>
+        <input type="text" id="${id}-label" class="form-control mb-3" name="label" value="" required>
       </div>
       <div class="col-lg-6">
         <label for="${id}-name">Field Name</label>
-        <input type="text" id="${id}-name" class="form-control mb-3" name="data[${id}][name]" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="" required>
+        <input type="text" id="${id}-name" class="form-control mb-3" name="name" pattern="[a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="" required>
       </div>
     </div>
   </template>
@@ -68,15 +67,15 @@
     <div class="row g-3">
       <div class="col-lg-3">
         <label for="${id}-min">Min Date</label>
-        <input type="date" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" value="">
+        <input type="date" id="${id}-min" class="form-control mb-3" name="min" value="">
       </div>
       <div class="col-lg-3">
         <label for="${id}-max">Max Date</label>
-        <input type="date" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" value="">
+        <input type="date" id="${id}-max" class="form-control mb-3" name="max" value="">
       </div>
       <div class="col-lg-3">
         <label for="${id}-step">Step (seconds)</label>
-        <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" value="">
+        <input type="number" id="${id}-step" class="form-control mb-3" name="step" min="0" value="">
       </div>
     </div>
   </template>
@@ -84,15 +83,15 @@
     <div class="row g-3">
       <div class="col-lg-3">
         <label for="${id}-min">Min Time</label>
-        <input type="time" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" value="">
+        <input type="time" id="${id}-min" class="form-control mb-3" name="min" value="">
       </div>
       <div class="col-lg-3">
         <label for="${id}-max">Max Time</label>
-        <input type="time" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" value="">
+        <input type="time" id="${id}-max" class="form-control mb-3" name="max" value="">
       </div>
       <div class="col-lg-3">
         <label for="${id}-step">Step (seconds)</label>
-        <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" value="">
+        <input type="number" id="${id}-step" class="form-control mb-3" name="step" min="0" value="">
       </div>
     </div>
   </template>
@@ -100,15 +99,15 @@
     <div class="row g-3">
       <div class="col-lg-3">
         <label for="${id}-min">Min Number</label>
-        <input type="number" id="${id}-min" class="form-control mb-3" name="data[${id}][min]" value="">
+        <input type="number" id="${id}-min" class="form-control mb-3" name="min" value="">
       </div>
       <div class="col-lg-3">
         <label for="${id}-max">Max Number</label>
-        <input type="number" id="${id}-max" class="form-control mb-3" name="data[${id}][max]" value="">
+        <input type="number" id="${id}-max" class="form-control mb-3" name="max" value="">
       </div>
       <div class="col-lg-3">
         <label for="${id}-step">Step</label>
-        <input type="number" id="${id}-step" class="form-control mb-3" name="data[${id}][step]" min="0" value="">
+        <input type="number" id="${id}-step" class="form-control mb-3" name="step" min="0" value="">
       </div>
     </div>
   </template>
@@ -116,7 +115,7 @@
     <div class="row g-3">
       <div class="col-lg-12">
         <label for="${id}-options">Options (one per line, key | value or just value)</label>
-        <textarea id="${id}-options" class="form-control mb-3" name="data[${id}][options]" style="height: 10em;"></textarea>
+        <textarea id="${id}-options" class="form-control mb-3" name="options" style="height: 10em;"></textarea>
       </div>
     </div>
   </template>
@@ -222,11 +221,12 @@
 
       for (const key in data.values) {
         const value = data.values[key];
-        const name = 'data[' + data.id + '][' + key + ']';
+        const name = key; // Used to be data[field_id][key]
         const selector = '[name="' + name + '"]';
         const node = item.querySelector(selector);
         if (node == null) {
-          console.error('Could not find node with name %s', name);
+          // Since all possible fields come in via marshalling gocms.Field,
+          // silently skip over them
           continue;
         }
         node.value = value;
@@ -297,6 +297,54 @@
   })();
 </script>
 <script>
+  const FormSubmitter = (function() {
+    'use strict';
+
+    const buildPayload = function(form) {
+      let fields = [];
+      for (const item of form.querySelectorAll('li')) {
+        let record = {};
+        for (const input of item.querySelectorAll('input,textarea')) {
+          record[input.name] = input.value;
+        }
+        fields.push(record);
+      }
+      return {fields: fields};
+    };
+
+    const handleSubmit = function(event) {
+      event.preventDefault();
+
+      const form = event.target;
+      const payload = buildPayload(form);
+      console.log(payload);
+
+      const init = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      };
+      fetch(form.action, init)
+        .then(function(response) {
+          response.json();
+        })
+        .then(function(data) {
+          console.log(data)
+        });
+    };
+
+    const watch = function(form) {
+      form.addEventListener('submit', handleSubmit)
+    };
+
+    return {
+      watch: watch,
+    };
+  })();
+</script>
+<script>
   // This will probably come from the server
   const fieldTypeDefinitions = {{ .FieldTypes }};
 
@@ -333,5 +381,10 @@
     onAdd: ClassFieldBuilder.addHandler,
   };
   Sortable.create(classFields, classFieldsOptions);
+
+  // Override form submission by building a JSON array and sending that instead
+  // of a bunch of deeply nested field names that gin doesn't understand
+  const fieldForm = document.getElementById('field-form');
+  FormSubmitter.watch(fieldForm);
 </script>
 {{ end }}
