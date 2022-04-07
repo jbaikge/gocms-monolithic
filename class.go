@@ -1,11 +1,13 @@
 package gocms
 
 import (
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// Classes define a type of Document
 type Class struct {
 	Id      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Name    string             `form:"name" json:"name"`
@@ -15,6 +17,7 @@ type Class struct {
 	Fields  []Field            `json:"fields"`
 }
 
+// Repositories manage data storage and retrieval
 type ClassRepository interface {
 	DeleteClass(primitive.ObjectID) error
 	GetAllClasses() ([]Class, error)
@@ -24,6 +27,7 @@ type ClassRepository interface {
 	UpdateClass(*Class) error
 }
 
+// Services manage business rules while interacting with repositories
 type ClassService interface {
 	All() ([]Class, error)
 	Delete(Class) error
@@ -55,14 +59,50 @@ func (s classService) GetById(id primitive.ObjectID) (Class, error) {
 	return s.repo.GetClassById(id)
 }
 
-func (s classService) GetBySlug(slug string) (Class, error) {
+func (s classService) GetBySlug(slug string) (class Class, err error) {
 	return s.repo.GetClassBySlug(slug)
 }
 
-func (s classService) Insert(class *Class) error {
+func (s classService) Insert(class *Class) (err error) {
+	if err = s.Validate(class); err != nil {
+		return
+	}
+
+	if !class.Id.IsZero() {
+		return fmt.Errorf("class already has an ID")
+	}
+
+	if check, err := s.GetBySlug(class.Slug); err == nil {
+		return fmt.Errorf("slug %s already exists in %s", class.Slug, check.Id.Hex())
+	}
+
 	return s.repo.InsertClass(class)
 }
 
-func (s classService) Update(class *Class) error {
+func (s classService) Update(class *Class) (err error) {
+	if err = s.Validate(class); err != nil {
+		return
+	}
+
+	if class.Id.IsZero() {
+		return fmt.Errorf("class has no ID")
+	}
+
+	if check, err := s.GetBySlug(class.Slug); err == nil && check.Id != class.Id {
+		return fmt.Errorf("slug %s already exists in %s", class.Slug, check.Id.Hex())
+	}
+
 	return s.repo.UpdateClass(class)
+}
+
+func (s classService) Validate(class *Class) (err error) {
+	if class.Name == "" {
+		return fmt.Errorf("name is empty")
+	}
+
+	if class.Slug == "" {
+		return fmt.Errorf("slug is empty")
+	}
+
+	return
 }
