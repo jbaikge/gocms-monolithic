@@ -9,12 +9,13 @@ import (
 
 // Classes define a type of Document
 type Class struct {
-	Id      primitive.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name    string             `form:"name" json:"name"`
-	Slug    string             `form:"slug" json:"slug"`
-	Created time.Time          `json:"created"`
-	Updated time.Time          `json:"updated"`
-	Fields  []Field            `json:"fields"`
+	Id      primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
+	Parents []primitive.ObjectID `json:"parents"`
+	Name    string               `form:"name" json:"name"`
+	Slug    string               `form:"slug" json:"slug"`
+	Created time.Time            `json:"created"`
+	Updated time.Time            `json:"updated"`
+	Fields  []Field              `json:"fields"`
 }
 
 // Repositories manage data storage and retrieval
