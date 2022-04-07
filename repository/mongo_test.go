@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -16,10 +17,15 @@ func TestMongo(t *testing.T) {
 	const classColl = "classes"
 	const docColl = "documents"
 
+	dbHost := "localhost:27017"
+	if dbHostEnv := os.Getenv("DB_HOST"); dbHostEnv != "" {
+		dbHost = dbHostEnv
+	}
+
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+dbHost))
 	assert.NoError(t, err)
 
 	db := client.Database("testing")
