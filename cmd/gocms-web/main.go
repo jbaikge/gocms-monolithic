@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jbaikge/gocms"
@@ -13,9 +14,14 @@ import (
 )
 
 func main() {
+	dbHost := "localhost:27017"
+	if dbHostEnv := os.Getenv("DB_HOST"); dbHostEnv != "" {
+		dbHost = dbHostEnv
+	}
+
 	ctx := context.Background()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://"+dbHost))
 	if err != nil {
 		log.Fatalf("Unable to create client %v", err)
 	}
