@@ -44,18 +44,23 @@ func (r mockDocumentRepository) GetDocumentById(id primitive.ObjectID) (doc Docu
 	return
 }
 
-func (r mockDocumentRepository) GetDocumentBySlug(parent primitive.ObjectID, slug string) (doc Document, err error) {
-	doc, ok := r.byClassSlug[r.slugKey(parent, slug)]
+func (r mockDocumentRepository) GetChildDocumentBySlug(parentId primitive.ObjectID, slug string) (doc Document, err error) {
+	doc, ok := r.byParentSlug[r.slugKey(parentId, slug)]
 	if ok {
 		return
 	}
 
-	doc, ok = r.byParentSlug[r.slugKey(parent, slug)]
+	err = fmt.Errorf("document not found: %s", r.slugKey(parentId, slug))
+	return
+}
+
+func (r mockDocumentRepository) GetClassDocumentBySlug(classId primitive.ObjectID, slug string) (doc Document, err error) {
+	doc, ok := r.byClassSlug[r.slugKey(classId, slug)]
 	if ok {
 		return
 	}
 
-	err = fmt.Errorf("document not found: %s", r.slugKey(parent, slug))
+	err = fmt.Errorf("document not found: %s", r.slugKey(classId, slug))
 	return
 }
 
@@ -104,13 +109,13 @@ func TestDocumentService(t *testing.T) {
 		assert.NoError(t, service.Insert(&doc))
 
 		t.Run("Class ID", func(t *testing.T) {
-			byClass, err := service.GetBySlug(doc.ClassId, doc.Slug)
+			byClass, err := service.GetClassChildBySlug(doc.ClassId, doc.Slug)
 			assert.NoError(t, err)
 			assert.Equal(t, doc.Id, byClass.Id)
 		})
 
 		t.Run("Parent ID", func(t *testing.T) {
-			byParent, err := service.GetBySlug(doc.ParentId, doc.Slug)
+			byParent, err := service.GetChildBySlug(doc.ParentId, doc.Slug)
 			assert.NoError(t, err)
 			assert.Equal(t, doc.Id, byParent.Id)
 		})
