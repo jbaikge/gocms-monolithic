@@ -187,6 +187,41 @@ func (s *Server) HandleClassIndex() gin.HandlerFunc {
 	}
 }
 
+func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
+	name := "admin-document-builder"
+	s.renderer.AddFromFiles(
+		name,
+		filepath.Join(s.templatePath, "admin", "base.gohtml"),
+		filepath.Join(s.templatePath, "admin", "document-builder.gohtml"),
+	)
+	return func(c *gin.Context) {
+		var class gocms.Class
+		var doc gocms.Document
+
+		slug := c.Param("slug")
+		if slug == "" {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		class, err := s.classService.GetBySlug(slug)
+		if err != nil {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+
+		obj := gin.H{
+			"Document": doc,
+			"Class":    class,
+			"Error":    nil,
+		}
+		if list, ok := c.Get("classList"); ok {
+			obj["ClassList"] = list
+		}
+		c.HTML(http.StatusOK, name, obj)
+	}
+}
+
 func (s *Server) HandleNavBar() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		all, err := s.classService.All()

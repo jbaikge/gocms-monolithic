@@ -1,0 +1,31 @@
+{{ define "head" }}
+{{ end }}
+
+{{ define "content" }}
+<h1 class="fs-2 mb-3">{{ if .Document.Id.IsZero }}{{ .Class.NewItemLabel }}{{ else }}{{ .Class.EditItemLabel }}{{ end }}</h1>
+{{ if .Error }}
+<div class="alert alert-danger"><strong>Error:</strong> {{ .Error }}</div>
+{{ end }}
+<form method="post">
+  <div class="row g-3">
+    <div class="col-lg-3 mb-3">
+      <label for="slug">Slug</label>
+      <input type="text" id="slug" name="slug" class="form-control" pattern="[a-z][a-z0-9_]+" value="{{ .Document.Slug }}">
+    </div>
+  </div>
+  {{ range .Class.Fields }}
+  <div class="row g-3">
+    <div class="col-lg-6 mb-3">
+      <label for="{{ .Name }}">{{ .Label }}</label>
+    </div>
+  </div>
+  {{ end }}
+  <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+{{ end }}
+
+{{ define "sidebar" }}
+{{ end }}
+
+{{ define "footer" }}
+{{ end }}
