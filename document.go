@@ -21,6 +21,7 @@ type Document struct {
 type DocumentRepository interface {
 	DeleteDocument(primitive.ObjectID) error
 	GetDocumentById(primitive.ObjectID) (Document, error)
+	GetDocumentBySlug(primitive.ObjectID, string) (Document, error)
 	InsertDocument(*Document) error
 	UpdateDocument(*Document) error
 }
@@ -28,6 +29,7 @@ type DocumentRepository interface {
 type DocumentService interface {
 	Delete(Document) error
 	GetById(primitive.ObjectID) (Document, error)
+	GetBySlug(primitive.ObjectID, string) (Document, error)
 	Insert(*Document) error
 	Update(*Document) error
 }
@@ -50,6 +52,10 @@ func (s documentService) GetById(id primitive.ObjectID) (Document, error) {
 	return s.repo.GetDocumentById(id)
 }
 
+func (s documentService) GetBySlug(parent primitive.ObjectID, slug string) (Document, error) {
+	return s.repo.GetDocumentBySlug(parent, slug)
+}
+
 func (s documentService) Insert(doc *Document) error {
 	if err := s.Validate(doc); err != nil {
 		return err
@@ -57,6 +63,20 @@ func (s documentService) Insert(doc *Document) error {
 
 	if !doc.Id.IsZero() {
 		return fmt.Errorf("document already has an ID")
+	}
+
+	if doc.ParentId.IsZero() {
+		check, err := s.GetBySlug(doc.ClassId, doc.Slug)
+		if err == nil {
+			return fmt.Errorf("slug %s already exists in %s", doc.Slug, check.Id.Hex())
+		}
+	}
+
+	if !doc.ParentId.IsZero() {
+		check, err := s.GetBySlug(doc.ParentId, doc.Slug)
+		if err == nil {
+			return fmt.Errorf("slug %s already exists in %s", doc.Slug, check.Id.Hex())
+		}
 	}
 
 	return s.repo.InsertDocument(doc)
@@ -69,6 +89,20 @@ func (s documentService) Update(doc *Document) error {
 
 	if doc.Id.IsZero() {
 		return fmt.Errorf("document has no ID")
+	}
+
+	if doc.ParentId.IsZero() {
+		check, err := s.GetBySlug(doc.ClassId, doc.Slug)
+		if err == nil && check.Id != doc.Id {
+			return fmt.Errorf("slug %s already exists in %s", doc.Slug, check.Id.Hex())
+		}
+	}
+
+	if !doc.ParentId.IsZero() {
+		check, err := s.GetBySlug(doc.ParentId, doc.Slug)
+		if err == nil {
+			return fmt.Errorf("slug %s already exists in %s", doc.Slug, check.Id.Hex())
+		}
 	}
 
 	return s.repo.UpdateDocument(doc)

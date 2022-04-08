@@ -11,22 +11,28 @@ import (
 var _ DocumentRepository = mockDocumentRepository{}
 
 type mockDocumentRepository struct {
-	byId map[primitive.ObjectID]Document
+	byId         map[primitive.ObjectID]Document
+	byClassSlug  map[string]Document
+	byParentSlug map[string]Document
 }
 
 func NewMockDocumentRepository() mockDocumentRepository {
 	return mockDocumentRepository{
-		byId: make(map[primitive.ObjectID]Document),
+		byId:         make(map[primitive.ObjectID]Document),
+		byClassSlug:  make(map[string]Document),
+		byParentSlug: make(map[string]Document),
 	}
 }
 
 func (r mockDocumentRepository) DeleteDocument(id primitive.ObjectID) (err error) {
-	_, ok := r.byId[id]
+	doc, ok := r.byId[id]
 	if !ok {
 		// Silent failure
 		return
 	}
 	delete(r.byId, id)
+	delete(r.byClassSlug, r.slugKey(doc.ClassId, doc.Slug))
+	delete(r.byParentSlug, r.slugKey(doc.ParentId, doc.Slug))
 	return
 }
 
@@ -38,9 +44,26 @@ func (r mockDocumentRepository) GetDocumentById(id primitive.ObjectID) (doc Docu
 	return
 }
 
+func (r mockDocumentRepository) GetDocumentBySlug(parent primitive.ObjectID, slug string) (doc Document, err error) {
+	doc, ok := r.byClassSlug[r.slugKey(parent, slug)]
+	if ok {
+		return
+	}
+
+	doc, ok = r.byParentSlug[r.slugKey(parent, slug)]
+	if ok {
+		return
+	}
+
+	err = fmt.Errorf("document not found: %s", r.slugKey(parent, slug))
+	return
+}
+
 func (r mockDocumentRepository) InsertDocument(doc *Document) (err error) {
 	doc.Id = primitive.NewObjectID()
 	r.byId[doc.Id] = *doc
+	r.byClassSlug[r.slugKey(doc.ClassId, doc.Slug)] = *doc
+	r.byParentSlug[r.slugKey(doc.ParentId, doc.Slug)] = *doc
 	return
 }
 
@@ -49,11 +72,16 @@ func (r mockDocumentRepository) UpdateDocument(doc *Document) (err error) {
 		return
 	}
 	r.byId[doc.Id] = *doc
+	r.byClassSlug[r.slugKey(doc.ClassId, doc.Slug)] = *doc
+	r.byParentSlug[r.slugKey(doc.ParentId, doc.Slug)] = *doc
 	return
 }
 
-func TestDocumentService(t *testing.T) {
+func (r mockDocumentRepository) slugKey(id primitive.ObjectID, slug string) string {
+	return id.Hex() + "_" + slug
+}
 
+func TestDocumentService(t *testing.T) {
 	t.Run("GetById", func(t *testing.T) {
 		service := NewDocumentService(NewMockDocumentRepository())
 
@@ -65,9 +93,33 @@ func TestDocumentService(t *testing.T) {
 		assert.Equal(t, doc.Id, check.Id)
 	})
 
+	t.Run("GetBySlug", func(t *testing.T) {
+		service := NewDocumentService(NewMockDocumentRepository())
+
+		doc := Document{
+			ClassId:  primitive.NewObjectID(),
+			ParentId: primitive.NewObjectID(),
+			Slug:     "test",
+		}
+		assert.NoError(t, service.Insert(&doc))
+
+		t.Run("Class ID", func(t *testing.T) {
+			byClass, err := service.GetBySlug(doc.ClassId, doc.Slug)
+			assert.NoError(t, err)
+			assert.Equal(t, doc.Id, byClass.Id)
+		})
+
+		t.Run("Parent ID", func(t *testing.T) {
+			byParent, err := service.GetBySlug(doc.ParentId, doc.Slug)
+			assert.NoError(t, err)
+			assert.Equal(t, doc.Id, byParent.Id)
+		})
+	})
+
 	t.Run("Insert", func(t *testing.T) {
 		service := NewDocumentService(NewMockDocumentRepository())
 		classId := primitive.NewObjectID()
+		parentId := primitive.NewObjectID()
 
 		tests := []struct {
 			Name     string
@@ -107,7 +159,29 @@ func TestDocumentService(t *testing.T) {
 			{
 				"Existing ID",
 				true,
-				Document{Id: primitive.NewObjectID(), ClassId: primitive.NewObjectID(), Slug: "test"},
+				Document{
+					Id:      primitive.NewObjectID(),
+					ClassId: primitive.NewObjectID(),
+					Slug:    "test",
+				},
+			},
+			{
+				"Parent ID & Slug",
+				false,
+				Document{
+					ClassId:  primitive.NewObjectID(),
+					ParentId: parentId,
+					Slug:     "test",
+				},
+			},
+			{
+				"Parent ID & Dupe Slug",
+				true,
+				Document{
+					ClassId:  primitive.NewObjectID(),
+					ParentId: parentId,
+					Slug:     "test",
+				},
 			},
 		}
 
@@ -148,8 +222,8 @@ func TestDocumentService(t *testing.T) {
 			assert.Error(t, service.Update(&banana))
 		})
 
-		t.Run("Slug Takeover", func(t *testing.T) {
-			banana.Slug = "orange"
+		t.Run("Class Slug Takeover", func(t *testing.T) {
+			banana.Slug = orange.Slug
 			defer func() {
 				banana.Slug = "banana"
 			}()
@@ -159,13 +233,29 @@ func TestDocumentService(t *testing.T) {
 
 		t.Run("New Class, Dupe Slug", func(t *testing.T) {
 			banana.ClassId = primitive.NewObjectID()
-			banana.Slug = "orange"
+			banana.Slug = orange.Slug
 			defer func() {
 				banana.ClassId = classId
 				banana.Slug = "banana"
 			}()
 
 			assert.NoError(t, service.Update(&banana))
+		})
+
+		t.Run("Same Parent, Slug Frob", func(t *testing.T) {
+			banana.ParentId = primitive.NewObjectID()
+			orange.ParentId = banana.ParentId
+			defer func() {
+				banana.ParentId = primitive.NilObjectID
+				orange.ParentId = banana.ParentId
+				orange.Slug = "orange"
+			}()
+
+			assert.NoError(t, service.Update(&banana))
+			assert.NoError(t, service.Update(&orange))
+
+			orange.Slug = banana.Slug
+			assert.Error(t, service.Update(&orange))
 		})
 	})
 
