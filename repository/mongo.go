@@ -101,6 +101,18 @@ func (m mongoRepository) GetDocumentById(id primitive.ObjectID) (doc gocms.Docum
 	return
 }
 
+func (m mongoRepository) GetChildDocumentBySlug(id primitive.ObjectID, slug string) (doc gocms.Document, err error) {
+	filter := bson.D{{Key: "parent_id", Value: id}, {Key: "slug", Value: slug}}
+	err = m.documents.FindOne(m.context, filter).Decode(&doc)
+	return
+}
+
+func (m mongoRepository) GetClassDocumentBySlug(id primitive.ObjectID, slug string) (doc gocms.Document, err error) {
+	filter := bson.D{{Key: "class_id", Value: id}, {Key: "slug", Value: slug}}
+	err = m.documents.FindOne(m.context, filter).Decode(&doc)
+	return
+}
+
 func (m mongoRepository) InsertDocument(doc *gocms.Document) (err error) {
 	now := time.Now()
 	doc.Created = now

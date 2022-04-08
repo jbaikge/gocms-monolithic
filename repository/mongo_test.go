@@ -138,14 +138,29 @@ func TestMongo(t *testing.T) {
 
 		t.Run("Read", func(t *testing.T) {
 			doc := gocms.Document{
-				ClassId: class.Id,
-				Slug:    "read_test",
+				ClassId:  class.Id,
+				ParentId: primitive.NewObjectID(),
+				Slug:     "read_test",
 			}
 			assert.NoError(t, repo.InsertDocument(&doc))
 
-			check, err := repo.GetDocumentById(doc.Id)
-			assert.NoError(t, err)
-			assert.Equal(t, doc.ClassId, check.ClassId)
+			t.Run("GetDocumentById", func(t *testing.T) {
+				check, err := repo.GetDocumentById(doc.Id)
+				assert.NoError(t, err)
+				assert.Equal(t, doc.ClassId, check.ClassId)
+			})
+
+			t.Run("GetChildDocumentBySlug", func(t *testing.T) {
+				check, err := repo.GetChildDocumentBySlug(doc.ParentId, doc.Slug)
+				assert.NoError(t, err)
+				assert.Equal(t, doc.Id, check.Id)
+			})
+
+			t.Run("GetClassDocumentBySlug", func(t *testing.T) {
+				check, err := repo.GetClassDocumentBySlug(doc.ClassId, doc.Slug)
+				assert.NoError(t, err)
+				assert.Equal(t, doc.Id, check.Id)
+			})
 		})
 
 		t.Run("Update", func(t *testing.T) {
