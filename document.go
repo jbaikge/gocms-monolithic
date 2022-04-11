@@ -11,6 +11,7 @@ type Document struct {
 	Id        primitive.ObjectID `bson:"_id,omitempty"`
 	ClassId   primitive.ObjectID `bson:"class_id"`
 	ParentId  primitive.ObjectID `bson:"parent_id"`
+	Title     string
 	Slug      string
 	Created   time.Time
 	Updated   time.Time
