@@ -8,18 +8,36 @@
 {{ end }}
 <form method="post">
   <div class="row g-3">
-    <div class="col-lg-3 mb-3">
-      <label for="slug">Slug</label>
-      <input type="text" id="slug" name="slug" class="form-control" pattern="[a-z][a-z0-9_]+" value="{{ .Document.Slug }}">
+    <div class="col-lg-12 mb-3">
+      <label for="document-title">Title</label>
+      <input type="text" id="document-title" name="title" class="form-control" value="{{ .Document.Title }}">
+    </div>
+    <div class="col-lg-12 mb-3">
+      <label for="document-slug">Slug</label>
+      <input type="text" id="document-slug" name="slug" class="form-control" pattern="[a-z][a-z0-9_]+" value="{{ .Document.Slug }}">
     </div>
   </div>
-  {{ range .Class.Fields }}
   <div class="row g-3">
-    <div class="col-lg-6 mb-3">
+    {{ range .Class.Fields }}
+    <div class="col-lg-12 mb-3">
       <label for="{{ .Name }}">{{ .Label }}</label>
+      {{ if eq .Type "text" }}
+        <input type="text" id="{{ .Name }}" name="{{ .Name }}" class="form-control" value="{{ index $.Document.Values .Name }}">
+      {{ else if eq .Type "date" }}
+        <input type="date" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+      {{ else if eq .Type "datetime" }}
+        <input type="datetime-local" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+      {{ else if eq .Type "time" }}
+        <input type="time" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+      {{ else if eq .Type "number" }}
+        <input type="number" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+      {{ else if eq .Type "textarea" }}
+        <textarea id="{{ .Name }}" name="{{ .Name }}" class="form-control">{{ index $.Document.Values .Name }}</textarea>
+      {{ end }}
     </div>
+    {{ end }}
   </div>
-  {{ end }}
+  <input type="hidden" name="class_id" value="{{ .Class.Id.Hex }}">
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 {{ end }}
