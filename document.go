@@ -2,6 +2,7 @@ package gocms
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,6 +18,20 @@ type Document struct {
 	Updated   time.Time
 	Published time.Time
 	Values    map[string]interface{}
+}
+
+func (d Document) Columns(c Class) (values []string) {
+	columns := strings.Fields(c.TableFields)
+	if len(columns) == 0 {
+		columns = []string{"name"}
+	}
+
+	values = make([]string, len(columns))
+	for i, col := range columns {
+		values[i] = col
+	}
+
+	return
 }
 
 type DocumentList struct {

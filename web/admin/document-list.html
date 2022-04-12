@@ -4,6 +4,32 @@
 {{ define "content" }}
 <h1 class="fs-2 mb-3">{{ .Class.Name }}</h1>
 <p>Total documents: {{ .List.Total }}</p>
+
+<table class="table table-striped">
+  <thead>
+    <tr>
+      {{ range .Class.Labels }}
+        <th scope="col">{{ . }}</th>
+      {{ end }}
+      <th scope="col"><!-- Buttons column --></th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range $index, $document := .List.Documents }}
+      <tr>
+        {{ range (.Columns $.Class) }}
+          <td>{{ . }}</td>
+        {{ end }}
+        <td class="text-end">
+          <div class="btn-group" role="group" aria-label="Options">
+            <a class="btn btn-sm btn-primary" href="/admin/classes/{{ $.Class.Slug }}/{{ $document.Id.Hex }}">Edit</a>
+            <a class="btn btn-sm btn-danger" href="/admin/classes/{{ $.Class.Slug }}/{{ $document.Id.Hex }}/delete">Delete</a>
+          </div>
+        </td>
+      </tr>
+    {{ end }}
+  </tbody>
+</table>
 {{ end }}
 
 {{ define "sidebar" }}
