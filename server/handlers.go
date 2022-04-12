@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jbaikge/gocms"
@@ -164,6 +165,10 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 		filepath.Join(s.templatePath, "admin", "base.html"),
 		filepath.Join(s.templatePath, "admin", "document-builder.html"),
 	)
+
+	layout := "2006-01-02T15:04"
+	loc, _ := time.LoadLocation("America/New_York")
+
 	return func(c *gin.Context) {
 		var class gocms.Class
 		var doc gocms.Document
@@ -183,12 +188,19 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 			}
 			if doc, err = s.documentService.GetById(bsonId); err != nil {
 				c.AbortWithError(http.StatusInternalServerError, err)
+				return
 			}
+		} else {
+			doc.ClassId = class.Id
+			doc.Published = time.Now().In(loc)
 		}
 
 		if c.Request.Method == http.MethodPost {
 			doc.Title = c.PostForm("title")
 			doc.Slug = c.PostForm("slug")
+			if published, err := time.ParseInLocation(layout, c.PostForm("published"), loc); err == nil {
+				doc.Published = published
+			}
 			if doc.Values == nil {
 				doc.Values = make(map[string]interface{})
 			}
@@ -196,15 +208,19 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 				doc.Values[field.Name] = c.PostForm(field.Name)
 			}
 			if doc.Id.IsZero() {
-				doc.ClassId = class.Id
 				if err := s.documentService.Insert(&doc); err != nil {
 					c.AbortWithError(http.StatusInternalServerError, err)
+					return
 				}
 			} else {
 				if err := s.documentService.Update(&doc); err != nil {
 					c.AbortWithError(http.StatusInternalServerError, err)
+					return
 				}
 			}
+
+			c.Redirect(http.StatusSeeOther, "/admin/classes/"+class.Slug+"/"+doc.Id.Hex())
+			return
 		}
 
 		obj := gin.H{

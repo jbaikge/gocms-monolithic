@@ -16,6 +16,10 @@
       <label for="document-slug">Slug</label>
       <input type="text" id="document-slug" name="slug" class="form-control mb-4" pattern="[a-z][a-z0-9_]+" title="Must be lowercase alphanumeric; underscores allowed" value="{{ .Document.Slug }}" required>
     </div>
+    <div class="col-lg-12">
+      <label for="document-published">Published</label>
+      <input type="datetime-local" id="document-published" name="published" class="form-control mb-4" value="{{ .Document.Published.Format "2006-01-02T15:04" }}" required>
+    </div>
   </div>
   {{ range .Class.Fields }}
   <div class="row">
