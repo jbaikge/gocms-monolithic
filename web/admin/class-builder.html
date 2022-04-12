@@ -41,7 +41,13 @@
   </div>
   <div class="row">
     <div class="col-lg-12">
-      <label for="table_fields">Table Fields (space separated)</label>
+      <label for="table_labels">Table Header Labels (space separated)</label>
+      <input type="text" id="table_labels" name="table_labels" class="form-control mb-4" value="{{ .Class.TableLabels }}">
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <label for="table_fields">Table Field Names (space separated)</label>
       <input type="text" id="table_fields" name="table_fields" class="form-control mb-4" value="{{ .Class.TableFields }}">
     </div>
   </div>

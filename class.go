@@ -2,6 +2,7 @@ package gocms
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,10 +19,15 @@ type Class struct {
 	NewItemLabel  string               `json:"new_item_label" bson:"new_item_label" form:"new_item_label"`
 	EditItemLabel string               `json:"edit_item_label" bson:"edit_item_label" form:"edit_item_label"`
 	Slug          string               `json:"slug" bson:"slug" form:"slug"`
+	TableLabels   string               `json:"table_labels" bson:"table_labels" form:"table_labels"`
 	TableFields   string               `json:"table_fields" bson:"table_fields" form:"table_fields"`
 	Created       time.Time            `json:"created"`
 	Updated       time.Time            `json:"updated"`
 	Fields        []Field              `json:"fields"`
+}
+
+func (c Class) Labels() []string {
+	return strings.Fields(c.TableLabels)
 }
 
 // Repositories manage data storage and retrieval
