@@ -23,6 +23,7 @@ type Field struct {
 	Min             string             `json:"min" bson:",omitempty"`
 	Max             string             `json:"max" bson:",omitempty"`
 	Step            string             `json:"step" bson:",omitempty"`
+	Format          string             `json:"format" bson:",omitempty"`
 	Options         string             `json:"options" bson:",omitempty"`
 	DataSourceId    primitive.ObjectID `json:"data_source_id" bson:"data_source_id,omitempty"`
 	DataSourceValue string             `json:"data_source_value" bson:"data_source_value,omitempty"`
