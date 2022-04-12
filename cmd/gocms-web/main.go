@@ -30,9 +30,10 @@ func main() {
 
 	repo := repository.NewMongo(ctx, db)
 	classService := gocms.NewClassService(repo)
+	documentService := gocms.NewDocumentService(repo)
 
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
-	s := server.New("./web", router, classService)
+	s := server.New("./web", router, classService, documentService)
 	panic(s.Run(":8080"))
 }
