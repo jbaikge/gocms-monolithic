@@ -7,27 +7,27 @@ import (
 )
 
 type Server struct {
-	classService gocms.ClassService
-	// documentService gocms.DocumentService
-	renderer     multitemplate.Renderer
-	router       *gin.Engine
-	templatePath string
+	classService    gocms.ClassService
+	documentService gocms.DocumentService
+	renderer        multitemplate.Renderer
+	router          *gin.Engine
+	templatePath    string
 }
 
 func New(
 	templatePath string,
 	router *gin.Engine,
 	classService gocms.ClassService,
-	// documentService gocms.DocumentService,
+	documentService gocms.DocumentService,
 ) *Server {
 	renderer := multitemplate.NewRenderer()
 	router.HTMLRender = renderer
 	return &Server{
-		classService: classService,
-		// documentService: documentService,
-		renderer:     renderer,
-		router:       router,
-		templatePath: templatePath,
+		classService:    classService,
+		documentService: documentService,
+		renderer:        renderer,
+		router:          router,
+		templatePath:    templatePath,
 	}
 }
 
