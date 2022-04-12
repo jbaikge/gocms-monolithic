@@ -18,7 +18,8 @@ func (s *Server) Routes() *gin.Engine {
 		{
 			classes.GET("/new", s.HandleClassBuilder())
 			classes.POST("/new", s.HandleClassBuilder())
-			class := classes.Group("/:slug")
+			class := classes.Group("/:class")
+			class.Use(s.MiddlewareClassInit())
 			{
 				class.GET("/", s.HandleDocumentList())
 				class.GET("/edit", s.HandleClassBuilder())

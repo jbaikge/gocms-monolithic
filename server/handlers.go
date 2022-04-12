@@ -22,10 +22,9 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 		var err error
 
 		// Pull the class by the slug to edit it
-		if slug := c.Param("slug"); slug != "" {
-			class, err = s.classService.GetBySlug(slug)
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
+		if obj, ok := c.Get("class"); ok {
+			if class, ok = obj.(gocms.Class); !ok {
+				c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Could not cast class"))
 				return
 			}
 		}
@@ -96,22 +95,17 @@ func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 	}
 
 	return func(c *gin.Context) {
-		var class gocms.Class
-		var err error
-
-		if class, err = s.classService.GetBySlug(c.Param("slug")); err != nil {
-			c.AbortWithError(http.StatusNotFound, err)
-			return
-		}
-
 		obj := gin.H{
 			"FieldTypes": types,
-			"Class":      class,
-			"Error":      err,
+			"Error":      nil,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
 		}
+		if class, ok := c.Get("class"); ok {
+			obj["Class"] = class
+		}
+
 		c.HTML(http.StatusOK, name, obj)
 	}
 }
@@ -123,14 +117,21 @@ func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		var class gocms.Class
-		slug := c.Param("slug")
-		class, err := s.classService.GetBySlug(slug)
-		if err != nil {
+
+		obj, ok := c.Get("class")
+		if !ok {
 			c.JSON(http.StatusNotFound, gin.H{
 				"success": false,
-				"error":   "Class with slug, " + slug + ", not found",
+				"error":   "Class not found",
 			})
-			return
+		}
+
+		class, ok = obj.(gocms.Class)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"error":   "Could not cast class!",
+			})
 		}
 
 		var post postData
@@ -163,29 +164,19 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 		filepath.Join(s.templatePath, "admin", "document-builder.html"),
 	)
 	return func(c *gin.Context) {
-		var class gocms.Class
 		var doc gocms.Document
-
-		slug := c.Param("slug")
-		if slug == "" {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		class, err := s.classService.GetBySlug(slug)
-		if err != nil {
-			c.AbortWithError(http.StatusNotFound, err)
-			return
-		}
 
 		obj := gin.H{
 			"Document": doc,
-			"Class":    class,
 			"Error":    nil,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
 		}
+		if class, ok := c.Get("class"); ok {
+			obj["Class"] = class
+		}
+
 		c.HTML(http.StatusOK, name, obj)
 	}
 }
@@ -198,20 +189,6 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 		filepath.Join(s.templatePath, "admin", "document-list.html"),
 	)
 	return func(c *gin.Context) {
-		var class gocms.Class
-
-		slug := c.Param("slug")
-		if slug == "" {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		class, err := s.classService.GetBySlug(slug)
-		if err != nil {
-			c.AbortWithError(http.StatusNotFound, err)
-			return
-		}
-
 		params := gocms.DocumentListParams{
 			Size: 2,
 		}
@@ -222,12 +199,15 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 		}
 
 		obj := gin.H{
-			"Class": class,
-			"List":  list,
+			"List": list,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
 		}
+		if class, ok := c.Get("class"); ok {
+			obj["Class"] = class
+		}
+
 		c.HTML(http.StatusOK, name, obj)
 	}
 }
