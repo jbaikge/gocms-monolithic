@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/jbaikge/gocms"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (s *Server) HandleClassBuilder() gin.HandlerFunc {
@@ -164,17 +165,55 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 		filepath.Join(s.templatePath, "admin", "document-builder.html"),
 	)
 	return func(c *gin.Context) {
+		var class gocms.Class
 		var doc gocms.Document
+
+		if obj, ok := c.Get("class"); ok {
+			if class, ok = obj.(gocms.Class); !ok {
+				c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Could not cast class"))
+				return
+			}
+		}
+
+		if id := c.Param("doc_id"); id != "" {
+			bsonId, err := primitive.ObjectIDFromHex(id)
+			if err != nil {
+				c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+			if doc, err = s.documentService.GetById(bsonId); err != nil {
+				c.AbortWithError(http.StatusInternalServerError, err)
+			}
+		}
+
+		if c.Request.Method == http.MethodPost {
+			doc.Title = c.PostForm("title")
+			doc.Slug = c.PostForm("slug")
+			if doc.Values == nil {
+				doc.Values = make(map[string]interface{})
+			}
+			for _, field := range class.Fields {
+				doc.Values[field.Name] = c.PostForm(field.Name)
+			}
+			if doc.Id.IsZero() {
+				doc.ClassId = class.Id
+				if err := s.documentService.Insert(&doc); err != nil {
+					c.AbortWithError(http.StatusInternalServerError, err)
+				}
+			} else {
+				if err := s.documentService.Update(&doc); err != nil {
+					c.AbortWithError(http.StatusInternalServerError, err)
+				}
+			}
+		}
 
 		obj := gin.H{
 			"Document": doc,
+			"Class":    class,
 			"Error":    nil,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
-		}
-		if class, ok := c.Get("class"); ok {
-			obj["Class"] = class
 		}
 
 		c.HTML(http.StatusOK, name, obj)
