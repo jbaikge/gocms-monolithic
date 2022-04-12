@@ -228,8 +228,18 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 		filepath.Join(s.templatePath, "admin", "document-list.html"),
 	)
 	return func(c *gin.Context) {
+		var class gocms.Class
+
+		if obj, ok := c.Get("class"); ok {
+			if class, ok = obj.(gocms.Class); !ok {
+				c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Unable to cast class"))
+				return
+			}
+		}
+
 		params := gocms.DocumentListParams{
-			Size: 2,
+			ClassId: class.Id,
+			Size:    2,
 		}
 		list, err := s.documentService.List(params)
 		if err != nil {
@@ -238,13 +248,11 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 		}
 
 		obj := gin.H{
-			"List": list,
+			"List":  list,
+			"Class": class,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
-		}
-		if class, ok := c.Get("class"); ok {
-			obj["Class"] = class
 		}
 
 		c.HTML(http.StatusOK, name, obj)
