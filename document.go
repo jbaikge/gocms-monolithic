@@ -26,7 +26,7 @@ type DocumentList struct {
 
 type DocumentListParams struct {
 	ClassId primitive.ObjectID
-	Offset  int64
+	Page    int64
 	Size    int64
 }
 
@@ -52,6 +52,13 @@ type DocumentService interface {
 
 type documentService struct {
 	repo DocumentRepository
+}
+
+func (p DocumentListParams) Offset() (offset int64) {
+	if p.Page > 0 {
+		offset = (p.Page - 1) * p.Size
+	}
+	return
 }
 
 func NewDocumentService(repo DocumentRepository) DocumentService {

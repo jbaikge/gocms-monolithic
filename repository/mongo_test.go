@@ -206,7 +206,7 @@ func TestMongo(t *testing.T) {
 			params := gocms.DocumentListParams{
 				ClassId: classId,
 				Size:    2,
-				Offset:  0,
+				Page:    1,
 			}
 			page1, err := repo.GetDocumentList(params)
 			assert.NoError(t, err)
@@ -216,7 +216,7 @@ func TestMongo(t *testing.T) {
 				assert.Equal(t, ids[i], page1.Documents[i].Id)
 			}
 
-			params.Offset = 2
+			params.Page = 2
 			page2, err := repo.GetDocumentList(params)
 			assert.NoError(t, err)
 			assert.Equal(t, 3, page2.Total)

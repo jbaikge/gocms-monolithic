@@ -72,17 +72,18 @@ func (r mockDocumentRepository) GetDocumentList(params DocumentListParams) (list
 		err = fmt.Errorf("no documents for class: %s", params.ClassId.Hex())
 	}
 
-	if params.Offset >= int64(len(docs)) {
-		err = fmt.Errorf("offset out of bounds: %d (length: %d)", params.Offset, len(docs))
+	offset := params.Offset()
+	if offset >= int64(len(docs)) {
+		err = fmt.Errorf("offset out of bounds: %d (length: %d)", offset, len(docs))
 	}
 
-	end := params.Offset + params.Size
+	end := offset + params.Size
 	if end > int64(len(docs)) {
 		end = int64(len(docs))
 	}
 
 	list.Total = int64(len(docs))
-	list.Documents = docs[params.Offset:end]
+	list.Documents = docs[offset:end]
 
 	return
 }
@@ -323,7 +324,7 @@ func TestDocumentService(t *testing.T) {
 		params := DocumentListParams{
 			ClassId: classId,
 			Size:    2,
-			Offset:  0,
+			Page:    1,
 		}
 		page1, err := service.List(params)
 		assert.NoError(t, err)
@@ -333,7 +334,7 @@ func TestDocumentService(t *testing.T) {
 			assert.Equal(t, ids[i], page1.Documents[i].Id)
 		}
 
-		params.Offset = 2
+		params.Page = 2
 		page2, err := service.List(params)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, page2.Total)

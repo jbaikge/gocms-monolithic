@@ -125,7 +125,7 @@ func (m mongoRepository) GetDocumentList(params gocms.DocumentListParams) (list 
 		return
 	}
 
-	findOpts := options.Find().SetLimit(params.Size).SetSkip(params.Offset)
+	findOpts := options.Find().SetLimit(params.Size).SetSkip(params.Offset())
 	cursor, err := m.documents.Find(m.context, filter, findOpts)
 	if err != nil {
 		return
