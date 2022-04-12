@@ -32,6 +32,7 @@
               <a href="#" class="link-primary align-items-center{{ if ne $.Class.Id .Id }} collapsed{{ end }}" data-bs-toggle="collapse" data-bs-target="#collapse-{{ .Id.Hex }}" aria-expanded="true">{{ .MenuLabel }}</a>
               <ul class="list-unstyled small {{ if ne $.Class.Id .Id }}collapse{{ end }} ps-3" id="collapse-{{ .Id.Hex }}">
                 <li><a href="/admin/classes/{{ .Slug }}/new" class="link-secondary">{{ .AddItemLabel }}</a></li>
+                <li><a href="/admin/classes/{{ .Slug }}/documents" class="link-secondary">{{ .ViewItemLabel }}</a></li>
                 <li><a href="/admin/classes/{{ .Slug }}/edit" class="link-secondary">Edit Class</a></li>
                 <li><a href="/admin/classes/{{ .Slug }}/fields" class="link-secondary">Fields</a></li>
               </ul>
