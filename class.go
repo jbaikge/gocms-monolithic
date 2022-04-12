@@ -17,7 +17,6 @@ type Class struct {
 	AddItemLabel  string               `json:"add_item_label" bson:"add_item_label" form:"add_item_label" `
 	NewItemLabel  string               `json:"new_item_label" bson:"new_item_label" form:"new_item_label" `
 	EditItemLabel string               `json:"edit_item_label" bson:"edit_item_label" form:"edit_item_label" `
-	ViewItemLabel string               `json:"view_item_label" bson:"view_item_label" form:"view_item_label" `
 	Slug          string               `json:"slug" bson:"slug" form:"slug" `
 	Created       time.Time            `json:"created"`
 	Updated       time.Time            `json:"updated"`
