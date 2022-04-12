@@ -22,17 +22,17 @@
     <div class="col-lg-12">
       <label for="{{ .Name }}">{{ .Label }}</label>
       {{ if eq .Type "text" }}
-        <input type="text" id="{{ .Name }}" name="{{ .Name }}" class="form-control" value="{{ index $.Document.Values .Name }}">
+        <input type="text" id="{{ .Name }}" name="{{ .Name }}" class="form-control mb-4" value="{{ index $.Document.Values .Name }}">
       {{ else if eq .Type "date" }}
-        <input type="date" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+        <input type="date" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control mb-4" value="{{ index $.Document.Values .Name }}">
       {{ else if eq .Type "datetime" }}
-        <input type="datetime-local" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+        <input type="datetime-local" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control mb-4" value="{{ index $.Document.Values .Name }}">
       {{ else if eq .Type "time" }}
-        <input type="time" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+        <input type="time" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control mb-4" value="{{ index $.Document.Values .Name }}">
       {{ else if eq .Type "number" }}
-        <input type="number" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control" value="{{ index $.Document.Values .Name }}">
+        <input type="number" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control mb-4" value="{{ index $.Document.Values .Name }}">
       {{ else if eq .Type "textarea" }}
-        <textarea id="{{ .Name }}" name="{{ .Name }}" class="form-control">{{ index $.Document.Values .Name }}</textarea>
+        <textarea id="{{ .Name }}" name="{{ .Name }}" class="form-control mb-4">{{ index $.Document.Values .Name }}</textarea>
       {{ end }}
     </div>
   </div>
