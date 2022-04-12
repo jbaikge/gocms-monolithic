@@ -13,8 +13,8 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 	name := "admin-class-builder"
 	s.renderer.AddFromFiles(
 		name,
-		filepath.Join(s.templatePath, "admin", "base.gohtml"),
-		filepath.Join(s.templatePath, "admin", "class-builder.gohtml"),
+		filepath.Join(s.templatePath, "admin", "base.html"),
+		filepath.Join(s.templatePath, "admin", "class-builder.html"),
 	)
 
 	return func(c *gin.Context) {
@@ -69,8 +69,8 @@ func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 	name := "admin-class-field-builder"
 	s.renderer.AddFromFiles(
 		name,
-		filepath.Join(s.templatePath, "admin", "base.gohtml"),
-		filepath.Join(s.templatePath, "admin", "class-field-builder.gohtml"),
+		filepath.Join(s.templatePath, "admin", "base.html"),
+		filepath.Join(s.templatePath, "admin", "class-field-builder.html"),
 	)
 
 	types := []struct {
@@ -159,8 +159,8 @@ func (s *Server) HandleClassIndex() gin.HandlerFunc {
 	name := "admin-class-index"
 	s.renderer.AddFromFiles(
 		name,
-		filepath.Join(s.templatePath, "admin", "base.gohtml"),
-		filepath.Join(s.templatePath, "admin", "class.gohtml"),
+		filepath.Join(s.templatePath, "admin", "base.html"),
+		filepath.Join(s.templatePath, "admin", "class.html"),
 	)
 	return func(c *gin.Context) {
 		var class gocms.Class
@@ -191,8 +191,8 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 	name := "admin-document-builder"
 	s.renderer.AddFromFiles(
 		name,
-		filepath.Join(s.templatePath, "admin", "base.gohtml"),
-		filepath.Join(s.templatePath, "admin", "document-builder.gohtml"),
+		filepath.Join(s.templatePath, "admin", "base.html"),
+		filepath.Join(s.templatePath, "admin", "document-builder.html"),
 	)
 	return func(c *gin.Context) {
 		var class gocms.Class
