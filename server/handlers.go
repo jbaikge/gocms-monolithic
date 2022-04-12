@@ -155,38 +155,6 @@ func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
 	}
 }
 
-func (s *Server) HandleClassIndex() gin.HandlerFunc {
-	name := "admin-class-index"
-	s.renderer.AddFromFiles(
-		name,
-		filepath.Join(s.templatePath, "admin", "base.html"),
-		filepath.Join(s.templatePath, "admin", "class.html"),
-	)
-	return func(c *gin.Context) {
-		var class gocms.Class
-
-		slug := c.Param("slug")
-		if slug == "" {
-			c.AbortWithStatus(http.StatusNotFound)
-			return
-		}
-
-		class, err := s.classService.GetBySlug(slug)
-		if err != nil {
-			c.AbortWithError(http.StatusNotFound, err)
-			return
-		}
-
-		obj := gin.H{
-			"Class": class,
-		}
-		if list, ok := c.Get("classList"); ok {
-			obj["ClassList"] = list
-		}
-		c.HTML(http.StatusOK, name, obj)
-	}
-}
-
 func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 	name := "admin-document-builder"
 	s.renderer.AddFromFiles(
@@ -214,6 +182,48 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 			"Document": doc,
 			"Class":    class,
 			"Error":    nil,
+		}
+		if list, ok := c.Get("classList"); ok {
+			obj["ClassList"] = list
+		}
+		c.HTML(http.StatusOK, name, obj)
+	}
+}
+
+func (s *Server) HandleDocumentList() gin.HandlerFunc {
+	name := "admin-document-list"
+	s.renderer.AddFromFiles(
+		name,
+		filepath.Join(s.templatePath, "admin", "base.html"),
+		filepath.Join(s.templatePath, "admin", "document-list.html"),
+	)
+	return func(c *gin.Context) {
+		var class gocms.Class
+
+		slug := c.Param("slug")
+		if slug == "" {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+
+		class, err := s.classService.GetBySlug(slug)
+		if err != nil {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+
+		params := gocms.DocumentListParams{
+			Size: 2,
+		}
+		list, err := s.documentService.List(params)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		obj := gin.H{
+			"Class": class,
+			"List":  list,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
