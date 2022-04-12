@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
@@ -187,6 +188,47 @@ func TestMongo(t *testing.T) {
 
 			_, err := repo.GetDocumentById(doc.Id)
 			assert.Error(t, err)
+		})
+
+		t.Run("List", func(t *testing.T) {
+			classId := primitive.NewObjectID()
+			ids := make([]primitive.ObjectID, 3)
+
+			for i := range ids {
+				doc := gocms.Document{
+					ClassId: classId,
+					Slug:    fmt.Sprintf("test_%d", i),
+				}
+				assert.NoError(t, repo.InsertDocument(&doc))
+				ids[i] = doc.Id
+			}
+
+			params := gocms.DocumentListParams{
+				ClassId: classId,
+				Size:    2,
+				Offset:  0,
+			}
+			page1, err := repo.GetDocumentList(params)
+			assert.NoError(t, err)
+			assert.Equal(t, 3, page1.Total)
+			assert.Equal(t, 2, len(page1.Documents))
+			for i := range ids[0:2] {
+				assert.Equal(t, ids[i], page1.Documents[i].Id)
+			}
+
+			params.Offset = 2
+			page2, err := repo.GetDocumentList(params)
+			assert.NoError(t, err)
+			assert.Equal(t, 3, page2.Total)
+			assert.Equal(t, 1, len(page2.Documents))
+			for i := range ids[2:3] {
+				assert.Equal(t, ids[i], page1.Documents[i].Id)
+			}
+
+			params.ClassId = primitive.NewObjectID()
+			noResults, err := repo.GetDocumentList(params)
+			assert.NoError(t, err)
+			assert.Equal(t, 0, noResults.Total)
 		})
 	})
 }

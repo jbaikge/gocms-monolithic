@@ -113,6 +113,27 @@ func (m mongoRepository) GetClassDocumentBySlug(id primitive.ObjectID, slug stri
 	return
 }
 
+func (m mongoRepository) GetDocumentList(params gocms.DocumentListParams) (list gocms.DocumentList, err error) {
+	filter := bson.D{{Key: "class_id", Value: params.ClassId}}
+
+	countOpts := options.Count()
+	list.Total, err = m.documents.CountDocuments(m.context, filter, countOpts)
+	if err != nil {
+		return
+	}
+	if list.Total == 0 {
+		return
+	}
+
+	findOpts := options.Find().SetLimit(params.Size).SetSkip(params.Offset)
+	cursor, err := m.documents.Find(m.context, filter, findOpts)
+	if err != nil {
+		return
+	}
+	err = cursor.All(m.context, &list.Documents)
+	return
+}
+
 func (m mongoRepository) InsertDocument(doc *gocms.Document) (err error) {
 	now := time.Now()
 	doc.Created = now
