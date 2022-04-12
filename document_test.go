@@ -337,7 +337,6 @@ func TestDocumentService(t *testing.T) {
 		page2, err := service.List(params)
 		assert.NoError(t, err)
 		assert.Equal(t, 3, page2.Total)
-		fmt.Printf("%+v", page2)
 		assert.Equal(t, 1, len(page2.Documents))
 		for i := range ids[2:3] {
 			assert.Equal(t, ids[i], page1.Documents[i].Id)
