@@ -18,6 +18,7 @@ type Class struct {
 	NewItemLabel  string               `json:"new_item_label" bson:"new_item_label" form:"new_item_label"`
 	EditItemLabel string               `json:"edit_item_label" bson:"edit_item_label" form:"edit_item_label"`
 	Slug          string               `json:"slug" bson:"slug" form:"slug"`
+	TableFields   string               `json:"table_fields" bson:"table_fields" form:"table_fields"`
 	Created       time.Time            `json:"created"`
 	Updated       time.Time            `json:"updated"`
 	Fields        []Field              `json:"fields"`

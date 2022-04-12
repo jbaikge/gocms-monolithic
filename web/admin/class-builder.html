@@ -39,6 +39,12 @@
       <input type="text" id="edit_item_label" name="edit_item_label" class="form-control mb-4" value="{{ .Class.EditItemLabel }}">
     </div>
   </div>
+  <div class="row">
+    <div class="col-lg-12">
+      <label for="table_fields">Table Fields (space separated)</label>
+      <input type="text" id="table_fields" name="table_fields" class="form-control mb-4" value="{{ .Class.TableFields }}">
+    </div>
+  </div>
   <button type="submit" class="btn btn-primary">Submit</button>
 </form>
 {{ end }}
