@@ -19,10 +19,22 @@ type Document struct {
 	Values    map[string]interface{}
 }
 
+type DocumentList struct {
+	Total     int
+	Documents []Document
+}
+
+type DocumentListParams struct {
+	ClassId primitive.ObjectID
+	Offset  int
+	Size    int
+}
+
 type DocumentRepository interface {
 	DeleteDocument(primitive.ObjectID) error
 	GetChildDocumentBySlug(primitive.ObjectID, string) (Document, error)
 	GetClassDocumentBySlug(primitive.ObjectID, string) (Document, error)
+	GetDocumentList(DocumentListParams) (DocumentList, error)
 	GetDocumentById(primitive.ObjectID) (Document, error)
 	InsertDocument(*Document) error
 	UpdateDocument(*Document) error
@@ -34,6 +46,7 @@ type DocumentService interface {
 	GetChildBySlug(primitive.ObjectID, string) (Document, error)
 	GetClassChildBySlug(primitive.ObjectID, string) (Document, error)
 	Insert(*Document) error
+	List(DocumentListParams) (DocumentList, error)
 	Update(*Document) error
 }
 
@@ -87,6 +100,10 @@ func (s documentService) Insert(doc *Document) error {
 	}
 
 	return s.repo.InsertDocument(doc)
+}
+
+func (s documentService) List(params DocumentListParams) (DocumentList, error) {
+	return s.repo.GetDocumentList(params)
 }
 
 func (s documentService) Update(doc *Document) error {

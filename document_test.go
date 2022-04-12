@@ -12,6 +12,7 @@ var _ DocumentRepository = mockDocumentRepository{}
 
 type mockDocumentRepository struct {
 	byId         map[primitive.ObjectID]Document
+	byClassId    map[primitive.ObjectID][]Document
 	byClassSlug  map[string]Document
 	byParentSlug map[string]Document
 }
@@ -19,6 +20,7 @@ type mockDocumentRepository struct {
 func NewMockDocumentRepository() mockDocumentRepository {
 	return mockDocumentRepository{
 		byId:         make(map[primitive.ObjectID]Document),
+		byClassId:    make(map[primitive.ObjectID][]Document),
 		byClassSlug:  make(map[string]Document),
 		byParentSlug: make(map[string]Document),
 	}
@@ -64,11 +66,36 @@ func (r mockDocumentRepository) GetClassDocumentBySlug(classId primitive.ObjectI
 	return
 }
 
+func (r mockDocumentRepository) GetDocumentList(params DocumentListParams) (list DocumentList, err error) {
+	docs, ok := r.byClassId[params.ClassId]
+	if !ok {
+		err = fmt.Errorf("no documents for class: %s", params.ClassId.Hex())
+	}
+
+	if params.Offset >= len(docs) {
+		err = fmt.Errorf("offset out of bounds: %d (length: %d)", params.Offset, len(docs))
+	}
+
+	end := params.Offset + params.Size
+	if end > len(docs) {
+		end = len(docs)
+	}
+
+	list.Total = len(docs)
+	list.Documents = docs[params.Offset:end]
+
+	return
+}
+
 func (r mockDocumentRepository) InsertDocument(doc *Document) (err error) {
 	doc.Id = primitive.NewObjectID()
 	r.byId[doc.Id] = *doc
 	r.byClassSlug[r.slugKey(doc.ClassId, doc.Slug)] = *doc
 	r.byParentSlug[r.slugKey(doc.ParentId, doc.Slug)] = *doc
+	if _, ok := r.byClassId[doc.ClassId]; !ok {
+		r.byClassId[doc.ClassId] = make([]Document, 0, 16)
+	}
+	r.byClassId[doc.ClassId] = append(r.byClassId[doc.ClassId], *doc)
 	return
 }
 
@@ -276,5 +303,44 @@ func TestDocumentService(t *testing.T) {
 		// Make sure document no longer exists
 		_, err := service.GetById(doc.Id)
 		assert.Error(t, err)
+	})
+
+	t.Run("List", func(t *testing.T) {
+		service := NewDocumentService(NewMockDocumentRepository())
+
+		classId := primitive.NewObjectID()
+		ids := make([]primitive.ObjectID, 3)
+
+		for i := range ids {
+			doc := Document{
+				ClassId: classId,
+				Slug:    fmt.Sprintf("test_%d", i),
+			}
+			assert.NoError(t, service.Insert(&doc))
+			ids[i] = doc.Id
+		}
+
+		params := DocumentListParams{
+			ClassId: classId,
+			Size:    2,
+			Offset:  0,
+		}
+		page1, err := service.List(params)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, page1.Total)
+		assert.Equal(t, 2, len(page1.Documents))
+		for i := range ids[0:2] {
+			assert.Equal(t, ids[i], page1.Documents[i].Id)
+		}
+
+		params.Offset = 2
+		page2, err := service.List(params)
+		assert.NoError(t, err)
+		assert.Equal(t, 3, page2.Total)
+		fmt.Printf("%+v", page2)
+		assert.Equal(t, 1, len(page2.Documents))
+		for i := range ids[2:3] {
+			assert.Equal(t, ids[i], page1.Documents[i].Id)
+		}
 	})
 }
