@@ -20,14 +20,14 @@ type Document struct {
 }
 
 type DocumentList struct {
-	Total     int
+	Total     int64
 	Documents []Document
 }
 
 type DocumentListParams struct {
 	ClassId primitive.ObjectID
-	Offset  int
-	Size    int
+	Offset  int64
+	Size    int64
 }
 
 type DocumentRepository interface {

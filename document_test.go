@@ -72,16 +72,16 @@ func (r mockDocumentRepository) GetDocumentList(params DocumentListParams) (list
 		err = fmt.Errorf("no documents for class: %s", params.ClassId.Hex())
 	}
 
-	if params.Offset >= len(docs) {
+	if params.Offset >= int64(len(docs)) {
 		err = fmt.Errorf("offset out of bounds: %d (length: %d)", params.Offset, len(docs))
 	}
 
 	end := params.Offset + params.Size
-	if end > len(docs) {
-		end = len(docs)
+	if end > int64(len(docs)) {
+		end = int64(len(docs))
 	}
 
-	list.Total = len(docs)
+	list.Total = int64(len(docs))
 	list.Documents = docs[params.Offset:end]
 
 	return
