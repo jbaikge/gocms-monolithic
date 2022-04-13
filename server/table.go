@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/jbaikge/gocms"
@@ -52,7 +51,7 @@ func (t Table) Body() (rows []TableRow) {
 			default:
 				val, ok := doc.Values[name]
 				if !ok {
-					value = fmt.Sprintf("unknown field: %s", name)
+					// Silently return a blank string
 					break
 				}
 				value = t.class.Field(name).Apply(val)
