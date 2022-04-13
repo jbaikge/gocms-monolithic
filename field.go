@@ -37,22 +37,27 @@ type Field struct {
 // Takes in any value from a Document.Values item and converts it based on the
 // field type, then optionally formats the value if defined
 func (f Field) Apply(value interface{}) string {
-	if s, ok := value.(string); ok {
+	switch v := value.(type) {
+	case string:
 		if f.Format == "" {
-			return s
+			return v
 		}
 		if f.Type == TypeDate {
-			t, _ := time.Parse("2006-01-02", s)
+			t, _ := time.Parse("2006-01-02", v)
 			return t.Format(f.Format)
 		}
 		if f.Type == TypeDateTime {
-			t, _ := time.Parse("2006-01-02T15:04", s)
+			t, _ := time.Parse("2006-01-02T15:04", v)
 			return t.Format(f.Format)
 		}
 		if f.Type == TypeTime {
-			t, _ := time.Parse("15:04", s)
+			t, _ := time.Parse("15:04", v)
 			return t.Format(f.Format)
 		}
+	case primitive.ObjectID:
+		return v.Hex()
+	case time.Time:
+		return v.Format("Jan 2, 2006 3:04pm")
 	}
 	return "-nil-"
 }
