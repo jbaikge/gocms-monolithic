@@ -18,7 +18,7 @@
     </div>
     <div class="col-lg-12">
       <label for="document-published">Published</label>
-      <input type="datetime-local" id="document-published" name="published" class="form-control mb-4" value="{{ .Document.Published.Format "2006-01-02T15:04" }}" required>
+      <input type="datetime-local" id="document-published" name="published" class="form-control mb-4" value="{{ .Document.Published.Local.Format "2006-01-02T15:04" }}" required>
     </div>
   </div>
   {{ range .Class.Fields }}
@@ -37,6 +37,14 @@
         <input type="number" id="{{ .Name }}" name="{{ .Name }}" {{ if ne .Min "" }}min="{{ .Min }}"{{ end }} {{ if ne .Max "" }}max="{{ .Max }}"{{ end }} {{ if ne .Step "" }}step="{{ .Step }}"{{ end }} class="form-control mb-4" value="{{ index $.Document.Values .Name }}">
       {{ else if eq .Type "textarea" }}
         <textarea id="{{ .Name }}" name="{{ .Name }}" class="form-control mb-4">{{ index $.Document.Values .Name }}</textarea>
+      {{ else if eq .Type "select" }}
+      {{ $name := .Name }}
+        <select id="{{ .Name }}" name="{{ .Name }}" class="form-control mb-4">
+          <option value="">Choose an option</option>
+          {{ range .OptionList }}
+            <option value="{{ .Value }}"{{ if eq .Value (index $.Document.Values $name) }} selected{{ end }}>{{ .Label }}</option>
+          {{ end }}
+        </select>
       {{ end }}
     </div>
   </div>
