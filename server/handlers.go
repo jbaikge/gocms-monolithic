@@ -291,7 +291,7 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 			return
 		}
 
-		table := NewTable(&class, list.Documents)
+		table := NewTable(class, list.Documents)
 
 		obj := gin.H{
 			"Class":      class,

@@ -8,16 +8,19 @@ import (
 
 // Manages data to build HTML tables
 type Table struct {
-	class     *gocms.Class
+	class     gocms.Class
 	documents []gocms.Document
 }
 
+// Holds necessary information for table rows including the document and
+// the formatted strings for each column.
 type TableRow struct {
 	Document gocms.Document
 	Columns  []string
 }
 
-func NewTable(class *gocms.Class, docs []gocms.Document) Table {
+// Creates a new table
+func NewTable(class gocms.Class, docs []gocms.Document) Table {
 	return Table{
 		class:     class,
 		documents: docs,
