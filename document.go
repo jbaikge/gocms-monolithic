@@ -20,15 +20,31 @@ type Document struct {
 	Values    map[string]interface{}
 }
 
+// Uses Class.Fields to convert and format document values and returns as a
+// slice of strings.
+//
+// Useful in templates as such:
+// {{ range .Documents }}
+//   {{ range (.Columns $.Class) }}
+//     {{ . }}
+//   {{ end }}
+// {{ end }}
 func (d Document) Columns(c Class) (values []string) {
 	columns := strings.Fields(c.TableFields)
 	if len(columns) == 0 {
-		columns = []string{"name"}
+		columns = []string{"title"}
 	}
 
 	values = make([]string, len(columns))
 	for i, col := range columns {
-		values[i] = col
+		switch col {
+		case "title":
+			values[i] = d.Title
+		case "slug":
+			values[i] = d.Slug
+		default:
+			values[i] = c.Field(col).Value(d.Values[col])
+		}
 	}
 
 	return

@@ -1,6 +1,10 @@
 package gocms
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 const (
 	TypeDate        = "date"
@@ -28,4 +32,27 @@ type Field struct {
 	DataSourceId    primitive.ObjectID `json:"data_source_id" bson:"data_source_id,omitempty"`
 	DataSourceValue string             `json:"data_source_value" bson:"data_source_value,omitempty"`
 	DataSourceTitle string             `json:"data_source_title" bson:"data_source_title,omitempty"`
+}
+
+// Takes in any value from a Document.Values item and converts it based on the
+// field type, then optionally formats the value if defined
+func (f Field) Value(value interface{}) string {
+	if s, ok := value.(string); ok {
+		if f.Format == "" {
+			return s
+		}
+		if f.Type == TypeDate {
+			t, _ := time.Parse("2006-01-02", s)
+			return t.Format(f.Format)
+		}
+		if f.Type == TypeDateTime {
+			t, _ := time.Parse("2006-01-02T15:04", s)
+			return t.Format(f.Format)
+		}
+		if f.Type == TypeTime {
+			t, _ := time.Parse("15:04", s)
+			return t.Format(f.Format)
+		}
+	}
+	return "-nil-"
 }

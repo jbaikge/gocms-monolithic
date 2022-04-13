@@ -26,8 +26,20 @@ type Class struct {
 	Fields        []Field              `json:"fields"`
 }
 
+// Breaks apart the TableLabels string into a slice for use in HTML tables
 func (c Class) Labels() []string {
 	return strings.Fields(c.TableLabels)
+}
+
+// Fetches the field represented by name. If the field does not exist, returns
+// an empty field.
+func (c Class) Field(name string) (field Field) {
+	for _, f := range c.Fields {
+		if f.Name == name {
+			return f
+		}
+	}
+	return
 }
 
 // Repositories manage data storage and retrieval
