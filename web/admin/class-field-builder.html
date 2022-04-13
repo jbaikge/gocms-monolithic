@@ -138,7 +138,7 @@
         <select name="data_source_id" id="${id}-class" class="form-control mb-4">
           <option value="000000000000000000000000">Choose a class</option>
           {{ range .ClassList }}
-            <option value="{{ .Id }}">{{ .Name }}</option>
+            <option value="{{ .Id.Hex }}">{{ .Name }}</option>
           {{ end }}
         </select>
       </div>
@@ -337,7 +337,7 @@
       let fields = [];
       for (const item of form.querySelectorAll('li')) {
         let record = {};
-        for (const input of item.querySelectorAll('input,textarea')) {
+        for (const input of item.querySelectorAll('input,select,textarea')) {
           record[input.name] = input.value;
         }
         fields.push(record);
