@@ -29,9 +29,9 @@ type Field struct {
 	Step            string             `json:"step" bson:",omitempty"`
 	Format          string             `json:"format" bson:",omitempty"`
 	Options         string             `json:"options" bson:",omitempty"`
-	DataSourceId    primitive.ObjectID `json:"data_source_id" bson:"data_source_id,omitempty"`
-	DataSourceValue string             `json:"data_source_value" bson:"data_source_value,omitempty"`
-	DataSourceTitle string             `json:"data_source_title" bson:"data_source_title,omitempty"`
+	DataSourceId    primitive.ObjectID `json:"data_source_id" bson:"data_source_id,omitempty" form:"data_source_id"`
+	DataSourceValue string             `json:"data_source_value" bson:"data_source_value,omitempty" form:"data_source_value"`
+	DataSourceLabel string             `json:"data_source_label" bson:"data_source_label,omitempty" form:"data_source_label"`
 }
 
 // Takes in any value from a Document.Values item and converts it based on the
