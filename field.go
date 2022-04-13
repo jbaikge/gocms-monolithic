@@ -1,6 +1,7 @@
 package gocms
 
 import (
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -19,6 +20,11 @@ const (
 	TypeTinyMCE     = "tinymce"
 	TypeUpload      = "upload"
 )
+
+type FieldOption struct {
+	Value string
+	Label string
+}
 
 type Field struct {
 	Type            string             `json:"type"`
@@ -60,4 +66,20 @@ func (f Field) Apply(value interface{}) string {
 		return v.Format("Jan 2, 2006 3:04pm")
 	}
 	return "-nil-"
+}
+
+// Converts the options text to an array for use in HTML templates to
+// generate select options
+func (f Field) OptionList() (options []FieldOption) {
+	rows := strings.Split(strings.TrimSpace(f.Options), "\n")
+	options = make([]FieldOption, len(rows))
+	for i, row := range rows {
+		s := strings.SplitN(row, "|", 2)
+		if len(s) == 1 {
+			s = append(s, s[0])
+		}
+		s[0], s[1] = strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
+		options[i] = FieldOption{Value: s[0], Label: s[1]}
+	}
+	return
 }
