@@ -25,7 +25,11 @@ func NewTable(class *gocms.Class, docs []gocms.Document) Table {
 }
 
 func (t Table) Header() []string {
-	return strings.Fields(t.class.TableLabels)
+	headings := strings.Fields(t.class.TableLabels)
+	if len(headings) == 0 {
+		headings = []string{"Title"}
+	}
+	return headings
 }
 
 func (t Table) Body() (rows []TableRow) {
