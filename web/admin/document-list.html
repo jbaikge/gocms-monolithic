@@ -3,7 +3,14 @@
 
 {{ define "content" }}
 <h1 class="fs-2 mb-3">{{ .Class.Name }}</h1>
-<p>Total documents: {{ .List.Total }}</p>
+
+<nav aria-label="Page navigation">
+  <ul class="pagination justify-content-center">
+    {{ range .Pagination.Links }}
+      <li class="page-item{{ if .Disabled }} disabled{{ end }}{{ if .Active }} active{{ end }}"><a class="page-link" href="/admin/classes/{{ $.Class.Slug }}/?p={{ .Page }}">{{ .Label }}</a></li>
+    {{ end }}
+  </ul>
+</nav>
 
 <table class="table table-striped">
   <thead>

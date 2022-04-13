@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -253,8 +254,14 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 			}
 		}
 
+		page, err := strconv.ParseInt(c.Query("p"), 10, 64)
+		if err != nil || page == 0 {
+			page = 1
+		}
+
 		params := gocms.DocumentListParams{
 			ClassId: class.Id,
+			Page:    page,
 			Size:    2,
 		}
 		list, err := s.documentService.List(params)
@@ -266,8 +273,9 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 		table := NewTable(&class, list.Documents)
 
 		obj := gin.H{
-			"Class": class,
-			"Table": table,
+			"Class":      class,
+			"Table":      table,
+			"Pagination": NewPagination(params.Page, params.Size, list.Total),
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
