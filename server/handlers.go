@@ -225,6 +225,26 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 			return
 		}
 
+		for i, field := range class.Fields {
+			if field.DataSourceId.IsZero() {
+				continue
+			}
+			docs := []gocms.Document{
+				{
+					Id:    primitive.NewObjectID(),
+					Slug:  "moo",
+					Title: "Cow",
+				},
+			}
+			for _, doc := range docs {
+				class.Fields[i].Options += fmt.Sprintf(
+					"%s|%s\n",
+					field.Apply(doc.Value(field.DataSourceValue)),
+					field.Apply(doc.Value(field.DataSourceLabel)),
+				)
+			}
+		}
+
 		obj := gin.H{
 			"Document": doc,
 			"Class":    class,
