@@ -36,7 +36,7 @@ type Field struct {
 
 // Takes in any value from a Document.Values item and converts it based on the
 // field type, then optionally formats the value if defined
-func (f Field) Value(value interface{}) string {
+func (f Field) Apply(value interface{}) string {
 	if s, ok := value.(string); ok {
 		if f.Format == "" {
 			return s
