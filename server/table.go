@@ -40,23 +40,13 @@ func (t Table) Body() (rows []TableRow) {
 		rows[i].Document = doc
 		rows[i].Columns = make([]string, len(names))
 		for n, name := range names {
-			var value string
-			switch name {
-			case "title":
-				value = doc.Title
-			case "slug":
-				value = doc.Slug
-			case "published":
-				value = doc.Published.String() // TODO format published date
-			default:
-				val, ok := doc.Values[name]
-				if !ok {
-					// Silently return a blank string
-					break
-				}
-				value = t.class.Field(name).Apply(val)
+			raw := doc.Value(name)
+			if raw == nil {
+				// Silently return a blank string
+				continue
 			}
-			rows[i].Columns[n] = value
+
+			rows[i].Columns[n] = t.class.Field(name).Apply(raw)
 		}
 	}
 
