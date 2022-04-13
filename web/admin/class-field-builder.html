@@ -123,11 +123,32 @@
       </div>
     </div>
   </template>
-  <template id="select-template">
+  <template id="select-static-template">
     <div class="row">
       <div class="col-lg-12">
         <label for="${id}-options">Options (one per line, key | value or just value)</label>
         <textarea id="${id}-options" class="form-control mb-4" name="options" style="height: 10em;"></textarea>
+      </div>
+    </div>
+  </template>
+  <template id="select-class-template">
+    <div class="row">
+      <div class="col-lg-3">
+        <label for="${id}-class">Class</label>
+        <select name="data_source_id" id="${id}-class" class="form-control mb-4">
+          <option value="000000000000000000000000">Choose a class</option>
+          {{ range .ClassList }}
+            <option value="{{ .Id }}">{{ .Name }}</option>
+          {{ end }}
+        </select>
+      </div>
+      <div class="col-lg-3">
+        <label for="${id}-value">Value Field</label>
+        <input type="text" name="data_source_value" id="${id}-value" class="form-control mb-4" value="">
+      </div>
+      <div class="col-lg-3">
+        <label for="${id}-label">Label Field</label>
+        <input type="text" name="data_source_label" id="${id}-label" class="form-control mb-4" value="">
       </div>
     </div>
   </template>
@@ -290,7 +311,7 @@
         'template': null,
         'values':   {},
       };
-    }
+    };
 
     const searchType = function(needle, haystack) {
       for (let i = 0; i < haystack.length; i++) {
