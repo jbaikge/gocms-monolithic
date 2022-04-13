@@ -19,6 +19,28 @@ type Document struct {
 	Values    map[string]interface{}
 }
 
+func (d Document) Value(key string) interface{} {
+	switch key {
+	case "id":
+		return d.Id
+	case "class_id":
+		return d.ClassId
+	case "parent_id":
+		return d.ParentId
+	case "title":
+		return d.Title
+	case "slug":
+		return d.Slug
+	case "published":
+		return d.Published
+	default:
+		if v, ok := d.Values[key]; ok {
+			return v
+		}
+	}
+	return nil
+}
+
 type DocumentList struct {
 	Total     int64
 	Documents []Document
