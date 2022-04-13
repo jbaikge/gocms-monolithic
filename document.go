@@ -2,7 +2,6 @@ package gocms
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -18,36 +17,6 @@ type Document struct {
 	Updated   time.Time
 	Published time.Time
 	Values    map[string]interface{}
-}
-
-// Uses Class.Fields to convert and format document values and returns as a
-// slice of strings.
-//
-// Useful in templates as such:
-// {{ range .Documents }}
-//   {{ range (.Columns $.Class) }}
-//     {{ . }}
-//   {{ end }}
-// {{ end }}
-func (d Document) Columns(c Class) (values []string) {
-	columns := strings.Fields(c.TableFields)
-	if len(columns) == 0 {
-		columns = []string{"title"}
-	}
-
-	values = make([]string, len(columns))
-	for i, col := range columns {
-		switch col {
-		case "title":
-			values[i] = d.Title
-		case "slug":
-			values[i] = d.Slug
-		default:
-			values[i] = c.Field(col).Value(d.Values[col])
-		}
-	}
-
-	return
 }
 
 type DocumentList struct {

@@ -2,7 +2,6 @@ package gocms
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,11 +23,6 @@ type Class struct {
 	Created       time.Time            `json:"created"`
 	Updated       time.Time            `json:"updated"`
 	Fields        []Field              `json:"fields"`
-}
-
-// Breaks apart the TableLabels string into a slice for use in HTML tables
-func (c Class) Labels() []string {
-	return strings.Fields(c.TableLabels)
 }
 
 // Fetches the field represented by name. If the field does not exist, returns
