@@ -8,22 +8,22 @@
 <table class="table table-striped">
   <thead>
     <tr>
-      {{ range .Class.Labels }}
+      {{ range .Table.Header }}
         <th scope="col">{{ . }}</th>
       {{ end }}
       <th scope="col"><!-- Buttons column --></th>
     </tr>
   </thead>
   <tbody>
-    {{ range $index, $document := .List.Documents }}
+    {{ range .Table.Body }}
       <tr>
-        {{ range (.Columns $.Class) }}
+        {{ range (.Columns) }}
           <td>{{ . }}</td>
         {{ end }}
         <td class="text-end">
           <div class="btn-group" role="group" aria-label="Options">
-            <a class="btn btn-sm btn-primary" href="/admin/classes/{{ $.Class.Slug }}/{{ $document.Id.Hex }}">Edit</a>
-            <a class="btn btn-sm btn-danger" href="/admin/classes/{{ $.Class.Slug }}/{{ $document.Id.Hex }}/delete">Delete</a>
+            <a class="btn btn-sm btn-primary" href="/admin/classes/{{ $.Class.Slug }}/{{ .Document.Id.Hex }}">Edit</a>
+            <a class="btn btn-sm btn-danger" href="/admin/classes/{{ $.Class.Slug }}/{{ .Document.Id.Hex }}/delete">Delete</a>
           </div>
         </td>
       </tr>

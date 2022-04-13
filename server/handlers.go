@@ -263,9 +263,11 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 			return
 		}
 
+		table := NewTable(&class, list.Documents)
+
 		obj := gin.H{
-			"List":  list,
 			"Class": class,
+			"Table": table,
 		}
 		if list, ok := c.Get("classList"); ok {
 			obj["ClassList"] = list
