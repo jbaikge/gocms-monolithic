@@ -3,10 +3,35 @@ package gocms
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/zeebo/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func TestDocumentValue(t *testing.T) {
+	doc := Document{
+		Id:        primitive.NewObjectID(),
+		ClassId:   primitive.NewObjectID(),
+		ParentId:  primitive.NewObjectID(),
+		Slug:      "my_document",
+		Title:     "My Title",
+		Published: time.Now(),
+		Values: map[string]interface{}{
+			"a": "value a",
+			"b": "value b",
+		},
+	}
+	assert.Equal(t, doc.Title, doc.Value("title"))
+	assert.Equal(t, doc.Id, doc.Value("id"))
+	assert.Equal(t, doc.ClassId, doc.Value("class_id"))
+	assert.Equal(t, doc.ParentId, doc.Value("parent_id"))
+	assert.Equal(t, doc.Slug, doc.Value("slug"))
+	assert.Equal(t, doc.Published, doc.Value("published"))
+	assert.Equal(t, doc.Values["a"], doc.Value("a"))
+	assert.Equal(t, doc.Values["b"], doc.Value("b"))
+	assert.Equal(t, nil, doc.Value("nil"))
+}
 
 var _ DocumentRepository = mockDocumentRepository{}
 
