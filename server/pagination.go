@@ -116,7 +116,7 @@ func (p Pagination) windowPages() (pages []int64) {
 	shoulder := float64(p.Shoulder)
 	rangeMin := math.Min(max-shoulder*2, math.Max(min, page-shoulder))
 	rangeMax := math.Max(min+shoulder*2, math.Min(max, page+shoulder))
-	pages = make([]int64, int(rangeMax-rangeMin))
+	pages = make([]int64, int(rangeMax-rangeMin+1))
 	for i := range pages {
 		pages[i] = int64(i) + int64(rangeMin)
 	}
