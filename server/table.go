@@ -47,13 +47,7 @@ func (t Table) Body() (rows []TableRow) {
 		rows[i].Document = doc
 		rows[i].Columns = make([]string, len(names))
 		for n, name := range names {
-			raw := doc.Value(name)
-			if raw == nil {
-				// Silently return a blank string
-				continue
-			}
-
-			rows[i].Columns[n] = t.class.Field(name).Apply(raw)
+			rows[i].Columns[n] = t.class.Field(name).Apply(doc.Value(name))
 		}
 	}
 
