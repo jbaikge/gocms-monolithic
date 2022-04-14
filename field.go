@@ -1,6 +1,7 @@
 package gocms
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -44,6 +45,8 @@ type Field struct {
 // field type, then optionally formats the value if defined
 func (f Field) Apply(value interface{}) string {
 	switch v := value.(type) {
+	case int:
+		return fmt.Sprint(v)
 	case string:
 		if f.Format == "" {
 			return v
@@ -78,8 +81,10 @@ func (f Field) OptionList() (options []FieldOption) {
 		if len(s) == 1 {
 			s = append(s, s[0])
 		}
-		s[0], s[1] = strings.TrimSpace(s[0]), strings.TrimSpace(s[1])
-		options[i] = FieldOption{Value: s[0], Label: s[1]}
+		options[i] = FieldOption{
+			Value: strings.TrimSpace(s[0]),
+			Label: strings.TrimSpace(s[1]),
+		}
 	}
 	return
 }
