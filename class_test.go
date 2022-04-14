@@ -9,6 +9,25 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+func TestClassFieldEmpty(t *testing.T) {
+	class := Class{}
+	field := class.Field("test")
+	assert.DeepEqual(t, Field{}, field)
+}
+
+func TestClassField(t *testing.T) {
+	class := Class{
+		Fields: []Field{
+			{
+				Name: "test",
+			},
+		},
+	}
+
+	assert.DeepEqual(t, Field{}, class.Field("unknown"))
+	assert.Equal(t, "test", class.Field("test").Name)
+}
+
 var _ ClassRepository = mockClassRepository{}
 
 type mockClassRepository struct {
