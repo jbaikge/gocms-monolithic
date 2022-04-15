@@ -1,9 +1,10 @@
 package server
 
 import (
+	"embed"
 	"fmt"
+	"html/template"
 	"net/http"
-	"path/filepath"
 	"strconv"
 	"time"
 
@@ -12,13 +13,16 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+//go:embed templates
+var fs embed.FS
+
 func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 	name := "admin-class-builder"
-	s.renderer.AddFromFiles(
-		name,
-		filepath.Join(s.templatePath, "admin", "base.html"),
-		filepath.Join(s.templatePath, "admin", "class-builder.html"),
-	)
+	s.renderer.Add(name, template.Must(template.New("base.html").ParseFS(
+		fs,
+		"templates/admin/base.html",
+		"templates/admin/class-builder.html",
+	)))
 
 	return func(c *gin.Context) {
 		var class gocms.Class
@@ -69,11 +73,11 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 
 func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 	name := "admin-class-field-builder"
-	s.renderer.AddFromFiles(
-		name,
-		filepath.Join(s.templatePath, "admin", "base.html"),
-		filepath.Join(s.templatePath, "admin", "class-field-builder.html"),
-	)
+	s.renderer.Add(name, template.Must(template.New("base.html").ParseFS(
+		fs,
+		"templates/admin/base.html",
+		"templates/admin/class-field-builder.html",
+	)))
 
 	types := []struct {
 		Type     string `json:"type"`
@@ -162,11 +166,11 @@ func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
 
 func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 	name := "admin-document-builder"
-	s.renderer.AddFromFiles(
-		name,
-		filepath.Join(s.templatePath, "admin", "base.html"),
-		filepath.Join(s.templatePath, "admin", "document-builder.html"),
-	)
+	s.renderer.Add(name, template.Must(template.New("base.html").ParseFS(
+		fs,
+		"templates/admin/base.html",
+		"templates/admin/document-builder.html",
+	)))
 
 	layout := "2006-01-02T15:04"
 	loc, _ := time.LoadLocation("America/New_York")
@@ -260,11 +264,12 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 
 func (s *Server) HandleDocumentList() gin.HandlerFunc {
 	name := "admin-document-list"
-	s.renderer.AddFromFiles(
-		name,
-		filepath.Join(s.templatePath, "admin", "base.html"),
-		filepath.Join(s.templatePath, "admin", "document-list.html"),
-	)
+	s.renderer.Add(name, template.Must(template.New("base.html").ParseFS(
+		fs,
+		"templates/admin/base.html",
+		"templates/admin/document-list.html",
+	)))
+
 	return func(c *gin.Context) {
 		var class gocms.Class
 

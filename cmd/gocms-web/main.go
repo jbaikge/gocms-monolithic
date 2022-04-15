@@ -34,6 +34,6 @@ func main() {
 
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
-	s := server.New("./web", router, classService, documentService)
+	s := server.New(router, classService, documentService)
 	panic(s.Run(":8080"))
 }

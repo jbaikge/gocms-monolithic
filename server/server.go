@@ -11,11 +11,9 @@ type Server struct {
 	documentService gocms.DocumentService
 	renderer        multitemplate.Renderer
 	router          *gin.Engine
-	templatePath    string
 }
 
 func New(
-	templatePath string,
 	router *gin.Engine,
 	classService gocms.ClassService,
 	documentService gocms.DocumentService,
@@ -27,7 +25,6 @@ func New(
 		documentService: documentService,
 		renderer:        renderer,
 		router:          router,
-		templatePath:    templatePath,
 	}
 }
 
