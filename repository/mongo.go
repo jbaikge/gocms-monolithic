@@ -70,7 +70,7 @@ func (m mongoRepository) InsertClass(class *gocms.Class) (err error) {
 	}
 	id, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return errors.New("Unable to cast newly inserted Class ID to ObjectID")
+		return errors.New("unable to cast newly inserted Class ID to ObjectID")
 	}
 	class.Id = id
 	return
@@ -84,7 +84,7 @@ func (m mongoRepository) UpdateClass(class *gocms.Class) (err error) {
 		return
 	}
 	if result.MatchedCount == 0 {
-		return errors.New("Did not match a Class to update")
+		return errors.New("did not match a Class to update")
 	}
 	return
 }
@@ -142,7 +142,7 @@ func (m mongoRepository) InsertDocument(doc *gocms.Document) (err error) {
 	result, err := m.documents.InsertOne(m.context, doc)
 	id, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return errors.New("Unable to cast newly inserted Document ID to ObjectID")
+		return errors.New("unable to cast newly inserted Document ID to ObjectID")
 	}
 
 	doc.Id = id
@@ -158,7 +158,7 @@ func (m mongoRepository) UpdateDocument(doc *gocms.Document) (err error) {
 		return
 	}
 	if result.MatchedCount == 0 {
-		return errors.New("Did not match a Document to update")
+		return errors.New("did not match a Document to update")
 	}
 	return
 }
