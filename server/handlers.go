@@ -41,7 +41,7 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 
 		// If no Class, then we are on /new
 		if _, ok := c.Get("class"); ok {
-			if err := getContext(c, "class", &class); err != nil  {
+			if err := getContext(c, "class", &class); err != nil {
 				c.AbortWithError(http.StatusInternalServerError, err)
 			}
 		}

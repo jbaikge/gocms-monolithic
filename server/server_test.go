@@ -62,12 +62,35 @@ func TestServer(t *testing.T) {
 		// to show what went wrong.
 		t.Run("PostNewEmpty", func(t *testing.T) {
 			var values url.Values
-			buffer := strings.NewReader(values.Encode())
-			req := httptest.NewRequest(http.MethodPost, "/admin/classes/new", buffer)
+			body := strings.NewReader(values.Encode())
+			req := httptest.NewRequest(http.MethodPost, "/admin/classes/new", body)
 			w := httptest.NewRecorder()
 			routes.ServeHTTP(w, req)
 			assert.Equal(t, http.StatusOK, w.Code)
 		})
 
+		// Valid POST will bounce to the field builder page with a 303 - See
+		// Other response
+		t.Run("PostNewClass", func(t *testing.T) {
+			values := make(url.Values)
+			values.Set("name", "Blogs")
+			values.Set("slug", "blog")
+			values.Set("singular_name", "Blog")
+			values.Set("menu_label", "Blogs")
+			values.Set("add_item_label", "Add Blog Entry")
+			values.Set("new_item_label", "New Blog Entry")
+			values.Set("edit_item_label", "Edit Blog Entry")
+			values.Set("table_labels", "Title Slug")
+			values.Set("table_fields", "title slug")
+			body := strings.NewReader(values.Encode())
+
+			req := httptest.NewRequest(http.MethodPost, "/admin/classes/new", body)
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+			w := httptest.NewRecorder()
+
+			routes.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusSeeOther, w.Code)
+		})
 	})
 }
