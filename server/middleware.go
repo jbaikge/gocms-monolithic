@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (s *Server) MiddlewareClassInit() gin.HandlerFunc {
+func (s *Server) MiddlewareClass() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		slug := c.Param("class")
 		if slug == "" {
