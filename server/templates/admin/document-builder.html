@@ -39,7 +39,7 @@
         <textarea id="{{ .Name }}" name="{{ .Name }}" class="form-control mb-4">{{ index $.Document.Values .Name }}</textarea>
       {{ else if eq .Type "select" }}
       {{ $name := .Name }}
-        <select id="{{ .Name }}" name="{{ .Name }}" class="form-control mb-4">
+        <select id="{{ .Name }}" name="{{ .Name }}" class="form-select mb-4">
           <option value="">Choose an option</option>
           {{ range .OptionList }}
             <option value="{{ .Value }}"{{ if eq .Value (index $.Document.Values $name) }} selected{{ end }}>{{ .Label }}</option>
