@@ -14,7 +14,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func TestMongo(t *testing.T) {
+func XXXTestMongo(t *testing.T) {
 	const classColl = "classes"
 	const docColl = "documents"
 
