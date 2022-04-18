@@ -162,3 +162,13 @@ func (m mongoRepository) UpdateDocument(doc *gocms.Document) (err error) {
 	}
 	return
 }
+
+func (m mongoRepository) empty() (err error) {
+	if err := m.documents.Drop(m.context); err != nil {
+		return err
+	}
+	if err := m.classes.Drop(m.context); err != nil {
+		return err
+	}
+	return
+}
