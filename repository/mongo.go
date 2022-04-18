@@ -20,7 +20,7 @@ type mongoRepository struct {
 }
 
 func NewMongo(ctx context.Context, db *mongo.Database) Repository {
-	return &mongoRepository{
+	return mongoRepository{
 		context:   ctx,
 		db:        db,
 		classes:   db.Collection("classes"),
