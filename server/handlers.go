@@ -16,6 +16,17 @@ import (
 //go:embed templates
 var fs embed.FS
 
+func getContext[T any](c *gin.Context, key string, into *T) (err error) {
+	if obj, ok := c.Get(key); ok {
+		if t, ok := obj.(T); ok {
+			*into = t
+			return
+		}
+		return fmt.Errorf("could not cast value")
+	}
+	return fmt.Errorf("key not found: %s", key)
+}
+
 func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 	name := "admin-class-builder"
 	s.renderer.Add(name, template.Must(template.New("base.html").ParseFS(
@@ -28,11 +39,10 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 		var class gocms.Class
 		var err error
 
-		// Pull the class by the slug to edit it
-		if obj, ok := c.Get("class"); ok {
-			if class, ok = obj.(gocms.Class); !ok {
-				c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Could not cast class"))
-				return
+		// If no Class, then we are on /new
+		if _, ok := c.Get("class"); ok {
+			if err := getContext(c, "class", &class); err != nil  {
+				c.AbortWithError(http.StatusInternalServerError, err)
 			}
 		}
 
