@@ -96,13 +96,47 @@ func TestServer(t *testing.T) {
 			values.Set("table_fields", "title slug")
 			body := strings.NewReader(values.Encode())
 
-			req := httptest.NewRequest(http.MethodPost, "/admin/classes/new", body)
+			uri := "/admin/classes/new"
+			req := httptest.NewRequest(http.MethodPost, uri, body)
 			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
 			w := httptest.NewRecorder()
 
 			routes.ServeHTTP(w, req)
 			assert.Equal(t, http.StatusSeeOther, w.Code)
+
+			location, err := w.Result().Location()
+			assert.NoError(t, err)
+			assert.Equal(t, "/admin/classes/blog/fields", location.Path)
+		})
+
+		// Editing an existing class should redirect to the same page after POST
+		t.Run("PostClassUpdate", func(t *testing.T) {
+			values := make(url.Values)
+			values.Set("name", "Objects")
+			values.Set("slug", "objects")
+			body := strings.NewReader(values.Encode())
+
+			// Push class in
+			uri := "/admin/classes/new"
+			req := httptest.NewRequest(http.MethodPost, uri, body)
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			w := httptest.NewRecorder()
+			routes.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusSeeOther, w.Code)
+
+			// Update class and check if we bounce to the listing page
+			uri = "/admin/classes/objects/edit"
+			body = strings.NewReader(values.Encode())
+			req = httptest.NewRequest(http.MethodPost, uri, body)
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			w = httptest.NewRecorder()
+			routes.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusSeeOther, w.Code)
+
+			location, err := w.Result().Location()
+			assert.NoError(t, err)
+			assert.Equal(t, "/admin/classes/objects/", location.Path)
 		})
 	})
 }
