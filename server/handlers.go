@@ -59,7 +59,7 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 				newUrl = fmt.Sprintf("/admin/classes/%s/fields", class.Slug)
 				err = s.classService.Insert(&class)
 			} else {
-				newUrl = fmt.Sprintf("/admin/classes/%s", class.Slug)
+				newUrl = fmt.Sprintf("/admin/classes/%s/", class.Slug)
 				err = s.classService.Update(&class)
 			}
 
