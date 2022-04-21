@@ -13,6 +13,18 @@ import (
 	"github.com/zeebo/assert"
 )
 
+func TestGetContext(t *testing.T) {
+	var i int
+	var f float64
+	c := new(gin.Context)
+
+	c.Set("myInt", 42)
+
+	assert.NoError(t, getContext(c, "myInt", &i))
+	assert.Error(t, getContext(c, "myInt", &f))
+	assert.Error(t, getContext(c, "myFloat", &f))
+}
+
 func TestServer(t *testing.T) {
 	router := gin.Default()
 	repo := repository.NewMemory()
