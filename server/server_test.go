@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -170,14 +172,74 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("HandleClassFieldsBuilderPost", func(t *testing.T) {
-		class := gocms.Class{Slug: "builder_post"}
-		assert.NoError(t, repo.InsertClass(&class))
-		assert.Equal(t, 0, len(class.Fields))
+		type request struct {
+			Fields []gocms.Field `json:"fields"`
+		}
 
-		target := "/admin/classes/" + class.Slug + "/fields"
-		body := strings.NewReader("")
-		req := httptest.NewRequest(http.MethodPost, target, body)
-		w := httptest.NewRecorder()
-		router.ServeHTTP(w, req)
+		type response struct {
+			Success bool   `json:"success"`
+			Error   string `json:"error"`
+		}
+
+		t.Run("Good", func(t *testing.T) {
+			class := gocms.Class{Name: "Builder Good", Slug: "builder_good"}
+			assert.NoError(t, repo.InsertClass(&class))
+
+			var data request
+			data.Fields = []gocms.Field{
+				{
+					Name:  "my_field",
+					Label: "My Field",
+					Type:  gocms.TypeText,
+				},
+			}
+			body := new(bytes.Buffer)
+			assert.NoError(t, json.NewEncoder(body).Encode(data))
+
+			target := "/admin/classes/" + class.Slug + "/fields"
+			req := httptest.NewRequest(http.MethodPost, target, body)
+			req.Header.Add("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusAccepted, w.Code)
+
+			var resp response
+			assert.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+			assert.True(t, resp.Success)
+			assert.Equal(t, "", resp.Error)
+		})
+
+		t.Run("Bad", func(t *testing.T) {
+			class := gocms.Class{Name: "Builder Bad", Slug: "builder_bad"}
+			assert.NoError(t, repo.InsertClass(&class))
+
+			var data request
+			data.Fields = []gocms.Field{
+				{
+					Name:  "my_field",
+					Label: "My Label",
+				},
+			}
+			body := new(bytes.Buffer)
+			assert.NoError(t, json.NewEncoder(body).Encode(data))
+
+			target := "/admin/classes/" + class.Slug + "/fields"
+			req := httptest.NewRequest(http.MethodPost, target, body)
+			req.Header.Add("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			var resp response
+			assert.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+			assert.False(t, resp.Success)
+			assert.Equal(t, "field[0] type is empty", resp.Error)
+		})
 	})
 }

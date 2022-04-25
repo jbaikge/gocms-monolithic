@@ -129,7 +129,8 @@ func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
 		// class gauranteed to be set per middleware preceding this handler
 		_ = getContext(c, "class", &class)
 
-		if err := c.Bind(&class); err != nil {
+		// Bind values to Fields field
+		if err := c.ShouldBind(&class); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
 				"error":   err.Error(),
@@ -138,7 +139,7 @@ func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
 		}
 
 		if err := s.classService.Update(&class); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
 				"error":   err.Error(),
 			})
