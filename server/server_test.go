@@ -110,6 +110,22 @@ func TestServer(t *testing.T) {
 			assert.Equal(t, "/admin/classes/blog/fields", location.Path)
 		})
 
+		// Invalid POST should return a BadRequest
+		t.Run("PostBadClass", func(t *testing.T) {
+			values := make(url.Values)
+			values.Add("parents", "moo") // Non array and not a BSON ID
+			body := strings.NewReader(values.Encode())
+
+			uri := "/admin/classes/new"
+			req := httptest.NewRequest(http.MethodPost, uri, body)
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+
+			w := httptest.NewRecorder()
+
+			routes.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+		})
+
 		// Editing an existing class should redirect to the listing page after
 		// POST
 		t.Run("PostClassUpdate", func(t *testing.T) {
