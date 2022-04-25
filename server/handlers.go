@@ -41,16 +41,13 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 
 		// If no Class, then we are on /new
 		if _, ok := c.Get("class"); ok {
-			if err := getContext(c, "class", &class); err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
+			// Class will be set by the middleware preceding this handler
+			_ = getContext(c, "class", &class)
 		}
 
 		if c.Request.Method == http.MethodPost {
 			// Bind form values where defined
 			if err := c.Bind(&class); err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
 				return
 			}
 
@@ -167,12 +164,8 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 		var class gocms.Class
 		var doc gocms.Document
 
-		if obj, ok := c.Get("class"); ok {
-			if class, ok = obj.(gocms.Class); !ok {
-				c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Could not cast class"))
-				return
-			}
-		}
+		// Class gauranteed to be set from middleware preceding this handler
+		_ = getContext(c, "class", &class)
 
 		if id := c.Param("doc_id"); id != "" {
 			bsonId, err := primitive.ObjectIDFromHex(id)
@@ -261,12 +254,8 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var class gocms.Class
 
-		if obj, ok := c.Get("class"); ok {
-			if class, ok = obj.(gocms.Class); !ok {
-				c.AbortWithError(http.StatusInternalServerError, fmt.Errorf("Unable to cast class"))
-				return
-			}
-		}
+		// Class gauranteed to be set by middleware preceding this handler
+		_ = getContext(c, "class", &class)
 
 		page, err := strconv.ParseInt(c.Query("p"), 10, 64)
 		if err != nil || page == 0 {
