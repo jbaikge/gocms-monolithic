@@ -159,6 +159,7 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 	)))
 
 	layout := "2006-01-02T15:04"
+	// TODO make the timezone configurable?
 	loc, _ := time.LoadLocation("America/New_York")
 
 	return func(c *gin.Context) {
@@ -175,7 +176,7 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 				return
 			}
 			if doc, err = s.documentService.GetById(bsonId); err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
+				c.AbortWithError(http.StatusNotFound, err)
 				return
 			}
 		} else {
@@ -197,12 +198,12 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 			}
 			if doc.Id.IsZero() {
 				if err := s.documentService.Insert(&doc); err != nil {
-					c.AbortWithError(http.StatusInternalServerError, err)
+					c.AbortWithError(http.StatusBadRequest, err)
 					return
 				}
 			} else {
 				if err := s.documentService.Update(&doc); err != nil {
-					c.AbortWithError(http.StatusInternalServerError, err)
+					c.AbortWithError(http.StatusBadRequest, err)
 					return
 				}
 			}
@@ -240,7 +241,11 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 			obj["ClassList"] = list
 		}
 
-		c.HTML(http.StatusOK, name, obj)
+		if c.GetHeader("Accept") == "application/json" {
+			c.JSON(http.StatusOK, obj)
+		} else {
+			c.HTML(http.StatusOK, name, obj)
+		}
 	}
 }
 
@@ -263,10 +268,15 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 			page = 1
 		}
 
+		perPage, err := strconv.ParseInt(c.Query("pp"), 10, 64)
+		if err != nil || perPage == 0 {
+			perPage = 10
+		}
+
 		params := gocms.DocumentListParams{
 			ClassId: class.Id,
 			Page:    page,
-			Size:    2,
+			Size:    perPage,
 		}
 		list, err := s.documentService.List(params)
 		if err != nil {
@@ -274,11 +284,9 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 			return
 		}
 
-		table := NewTable(class, list.Documents)
-
 		obj := gin.H{
 			"Class":      class,
-			"Table":      table,
+			"Table":      NewTable(class, list.Documents),
 			"Pagination": NewPagination(params.Page, params.Size, list.Total),
 		}
 		if list, ok := c.Get("classList"); ok {
