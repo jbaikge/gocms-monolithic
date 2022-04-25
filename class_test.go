@@ -1,6 +1,7 @@
 package gocms
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -26,6 +27,83 @@ func TestClassField(t *testing.T) {
 
 	assert.DeepEqual(t, Field{}, class.Field("unknown"))
 	assert.Equal(t, "test", class.Field("test").Name)
+}
+
+func TestFieldValidate(t *testing.T) {
+	tests := []struct {
+		Name   string
+		Fields []Field
+		Error  error
+	}{
+		{
+			Name: "No Error",
+			Fields: []Field{
+				{
+					Name:  "my_field",
+					Label: "My Field",
+					Type:  TypeText,
+				},
+			},
+			Error: nil,
+		},
+		{
+			Name: "No Name",
+			Fields: []Field{
+				{
+					Label: "My Field",
+					Type:  TypeText,
+				},
+			},
+			Error: errors.New("field[0] name is empty"),
+		},
+		{
+			Name: "No Label",
+			Fields: []Field{
+				{
+					Name: "my_field",
+					Type: TypeText,
+				},
+			},
+			Error: errors.New("field[0] label is empty"),
+		},
+		{
+			Name: "No Type",
+			Fields: []Field{
+				{
+					Name:  "my_field",
+					Label: "My Field",
+				},
+			},
+			Error: errors.New("field[0] type is empty"),
+		},
+		{
+			Name: "Deep",
+			Fields: []Field{
+				{
+					Name:  "moo",
+					Label: "Moo",
+					Type:  TypeText,
+				},
+				{
+					Name:  "cow",
+					Label: "Cow",
+				},
+			},
+			Error: errors.New("field[1] type is empty"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			class := Class{
+				Name:   "Test",
+				Slug:   "test",
+				Fields: test.Fields,
+			}
+
+			assert.Equal(t, test.Error, new(classService).Validate(&class))
+		})
+	}
 }
 
 var _ ClassRepository = mockClassRepository{}

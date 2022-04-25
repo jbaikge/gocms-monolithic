@@ -123,5 +123,17 @@ func (s classService) Validate(class *Class) (err error) {
 		return fmt.Errorf("slug is empty")
 	}
 
+	for i, f := range class.Fields {
+		if f.Name == "" {
+			return fmt.Errorf("field[%d] name is empty", i)
+		}
+		if f.Label == "" {
+			return fmt.Errorf("field[%d] label is empty", i)
+		}
+		if f.Type == "" {
+			return fmt.Errorf("field[%d] type is empty", i)
+		}
+	}
+
 	return
 }
