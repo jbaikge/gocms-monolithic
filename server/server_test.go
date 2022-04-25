@@ -110,7 +110,8 @@ func TestServer(t *testing.T) {
 			assert.Equal(t, "/admin/classes/blog/fields", location.Path)
 		})
 
-		// Editing an existing class should redirect to the same page after POST
+		// Editing an existing class should redirect to the listing page after
+		// POST
 		t.Run("PostClassUpdate", func(t *testing.T) {
 			values := make(url.Values)
 			values.Set("name", "Objects")
@@ -138,5 +139,29 @@ func TestServer(t *testing.T) {
 			assert.NoError(t, err)
 			assert.Equal(t, "/admin/classes/objects/", location.Path)
 		})
+	})
+
+	t.Run("HandleClassFieldBuilderGet", func(t *testing.T) {
+		// Nothing really exciting happens, a bunch of data gets pushed into the
+		// template context and rendered in the browser
+		class := gocms.Class{Slug: "builder_get"}
+		assert.NoError(t, repo.InsertClass(&class))
+		target := "/admin/classes/" + class.Slug + "/fields"
+		req := httptest.NewRequest(http.MethodGet, target, nil)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
+		assert.Equal(t, http.StatusOK, w.Code)
+	})
+
+	t.Run("HandleClassFieldsBuilderPost", func(t *testing.T) {
+		class := gocms.Class{Slug: "builder_post"}
+		assert.NoError(t, repo.InsertClass(&class))
+		assert.Equal(t, 0, len(class.Fields))
+
+		target := "/admin/classes/" + class.Slug + "/fields"
+		body := strings.NewReader("")
+		req := httptest.NewRequest(http.MethodPost, target, body)
+		w := httptest.NewRecorder()
+		router.ServeHTTP(w, req)
 	})
 }
