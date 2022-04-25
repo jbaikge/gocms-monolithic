@@ -43,6 +43,7 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 		if _, ok := c.Get("class"); ok {
 			if err := getContext(c, "class", &class); err != nil {
 				c.AbortWithError(http.StatusInternalServerError, err)
+				return
 			}
 		}
 
@@ -108,10 +109,6 @@ func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 		{gocms.TypeUpload, "Upload", "upload"},
 	}
 
-	type postData struct {
-		Fields []gocms.Field `form:"fields" json:"fields"`
-	}
-
 	return func(c *gin.Context) {
 		obj := gin.H{
 			"FieldTypes": types,
@@ -129,31 +126,13 @@ func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 }
 
 func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
-	type postData struct {
-		Fields []gocms.Field
-	}
-
 	return func(c *gin.Context) {
 		var class gocms.Class
 
-		obj, ok := c.Get("class")
-		if !ok {
-			c.JSON(http.StatusNotFound, gin.H{
-				"success": false,
-				"error":   "Class not found",
-			})
-		}
+		// class gauranteed to be set per middleware preceding this handler
+		_ = getContext(c, "class", &class)
 
-		class, ok = obj.(gocms.Class)
-		if !ok {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"success": false,
-				"error":   "Could not cast class!",
-			})
-		}
-
-		var post postData
-		if err := c.Bind(&post); err != nil {
+		if err := c.Bind(&class); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"success": false,
 				"error":   err.Error(),
@@ -161,7 +140,6 @@ func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
 			return
 		}
 
-		class.Fields = post.Fields
 		if err := s.classService.Update(&class); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"success": false,
