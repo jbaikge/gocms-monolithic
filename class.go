@@ -10,7 +10,7 @@ import (
 // Classes define a type of Document
 type Class struct {
 	Id            primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
-	Parents       []primitive.ObjectID `json:"parents"`
+	Parents       []primitive.ObjectID `json:"parents" bson:"parents" form:"parents"`
 	Name          string               `json:"name" bson:"name" form:"name"`
 	SingularName  string               `json:"singular_name" bson:"singular_name" form:"singular_name"`
 	MenuLabel     string               `json:"menu_label" bson:"menu_label" form:"menu_label"`
