@@ -3,16 +3,19 @@ package server
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jbaikge/gocms"
 	"github.com/jbaikge/gocms/repository"
 	"github.com/zeebo/assert"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestGetContext(t *testing.T) {
@@ -30,9 +33,9 @@ func TestGetContext(t *testing.T) {
 func TestServer(t *testing.T) {
 	router := gin.Default()
 	repo := repository.NewMemory()
-	classRepository := gocms.NewClassService(repo)
-	docRepository := gocms.NewDocumentService(repo)
-	s := New(router, classRepository, docRepository)
+	classService := gocms.NewClassService(repo)
+	docService := gocms.NewDocumentService(repo)
+	s := New(router, classService, docService)
 	routes := s.Routes()
 
 	t.Run("MiddlewareClass", func(t *testing.T) {
@@ -181,6 +184,7 @@ func TestServer(t *testing.T) {
 			Error   string `json:"error"`
 		}
 
+		// Follow all the rules
 		t.Run("Good", func(t *testing.T) {
 			class := gocms.Class{Name: "Builder Good", Slug: "builder_good"}
 			assert.NoError(t, repo.InsertClass(&class))
@@ -212,6 +216,7 @@ func TestServer(t *testing.T) {
 			assert.Equal(t, "", resp.Error)
 		})
 
+		// Trigger ClassService.Validate to fail
 		t.Run("Bad", func(t *testing.T) {
 			class := gocms.Class{Name: "Builder Bad", Slug: "builder_bad"}
 			assert.NoError(t, repo.InsertClass(&class))
@@ -240,6 +245,206 @@ func TestServer(t *testing.T) {
 			assert.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
 			assert.False(t, resp.Success)
 			assert.Equal(t, "field[0] type is empty", resp.Error)
+		})
+
+		// Sending in field data as a non-array
+		t.Run("Malformed", func(t *testing.T) {
+			class := gocms.Class{Name: "Builder Malformed", Slug: "builder_malformed"}
+			assert.NoError(t, repo.InsertClass(&class))
+
+			data := struct {
+				Fields gocms.Field
+			}{
+				Fields: gocms.Field{
+					Name:  "my_field",
+					Label: "My Field",
+					Type:  gocms.TypeText,
+				},
+			}
+			body := new(bytes.Buffer)
+			assert.NoError(t, json.NewEncoder(body).Encode(data))
+
+			target := "/admin/classes/" + class.Slug + "/fields"
+			req := httptest.NewRequest(http.MethodPost, target, body)
+			req.Header.Add("Content-Type", "application/json")
+
+			w := httptest.NewRecorder()
+
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			var resp response
+			assert.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+			assert.False(t, resp.Success)
+			assert.Equal(t, "json: cannot unmarshal", resp.Error[:22])
+		})
+	})
+
+	t.Run("HandleDocumentBuilder", func(t *testing.T) {
+		type response struct {
+			Document gocms.Document
+			Class    gocms.Class
+			Error    error
+		}
+		class := gocms.Class{
+			Name: "Doc Builder",
+			Slug: "builder_class",
+			Fields: []gocms.Field{
+				{
+					Name:  "field_1",
+					Label: "Field 1",
+					Type:  gocms.TypeText,
+				},
+			},
+		}
+		assert.NoError(t, repo.InsertClass(&class))
+		baseURL := "/admin/classes/" + class.Slug
+
+		doc := gocms.Document{ClassId: class.Id, Slug: "builder_doc", Title: "Doc"}
+		assert.NoError(t, repo.InsertDocument(&doc))
+
+		// Retrieve the details for a new document form, ask for JSON instead
+		// of trying to parse the HTML
+		t.Run("New Form", func(t *testing.T) {
+			target := baseURL + "/new"
+			req := httptest.NewRequest(http.MethodGet, target, nil)
+			req.Header.Add("Accept", "application/json")
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusOK, w.Code)
+
+			var resp response
+			assert.NoError(t, json.NewDecoder(w.Body).Decode(&resp))
+			assert.False(t, resp.Document.ClassId.IsZero())
+			assert.False(t, resp.Document.Published.IsZero())
+		})
+
+		t.Run("Post New", func(t *testing.T) {
+			values := make(url.Values)
+			values.Set("title", "Post Document")
+			values.Set("slug", "post_document")
+			values.Set("published", time.Now().Format("2006-01-02T15:04"))
+			values.Set("field_1", "value_1")
+			values.Set("field_2", "value_2") // Extra, should be ignored
+			body := strings.NewReader(values.Encode())
+
+			target := baseURL + "/new"
+			req := httptest.NewRequest(http.MethodPost, target, body)
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			// For now assert there's a bounce, might figure out how to verify
+			// the URL later
+			assert.Equal(t, http.StatusSeeOther, w.Code)
+		})
+
+		t.Run("Update", func(t *testing.T) {
+			values := make(url.Values)
+			values.Set("title", "Updated Document")
+			values.Set("slug", doc.Slug)
+			values.Set("field_1", "Updated Field 1")
+			body := strings.NewReader(values.Encode())
+
+			target := baseURL + "/" + doc.Id.Hex()
+			req := httptest.NewRequest(http.MethodPost, target, body)
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusSeeOther, w.Code)
+
+			// Essentially refresh the page
+			location, _ := w.Result().Location()
+			assert.Equal(t, location.Path, target)
+		})
+
+		t.Run("Fail Validation", func(t *testing.T) {
+			values := make(url.Values)
+			body := strings.NewReader(values.Encode())
+
+			target := baseURL + "/new"
+			req := httptest.NewRequest(http.MethodPost, target, body)
+			req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
+			w := httptest.NewRecorder()
+
+			// Insert with missing data
+			router.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			// Update with missing data
+			req.URL.Path = baseURL + "/" + doc.Id.Hex()
+			router.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+		})
+
+		t.Run("Bad ID", func(t *testing.T) {
+			target := baseURL + "/lol"
+			req := httptest.NewRequest(http.MethodGet, target, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusBadRequest, w.Code)
+
+			req.URL.Path = baseURL + "/" + primitive.NewObjectID().Hex()
+			w = httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+			assert.Equal(t, http.StatusNotFound, w.Code)
+		})
+	})
+
+	t.Run("HandleDocumentList", func(t *testing.T) {
+		class := gocms.Class{Name: "Doc Test", Slug: "doc_test"}
+		assert.NoError(t, repo.InsertClass(&class))
+		baseURL := "/admin/classes/" + class.Slug + "/"
+
+		numDocs := 10
+		for i := 0; i < numDocs; i++ {
+			doc := gocms.Document{
+				ClassId: class.Id,
+				Title:   fmt.Sprintf("Document %d", i),
+				Slug:    fmt.Sprintf("doc_%d", i),
+			}
+			assert.NoError(t, repo.InsertDocument(&doc))
+		}
+
+		// Default listing landing page
+		t.Run("Landing", func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, baseURL, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusOK, w.Code)
+
+			body := w.Body.String()
+			assert.Equal(t, numDocs+1, strings.Count(body, "<tr>"))
+		})
+
+		// Change the number of items listed per page
+		t.Run("Per Page", func(t *testing.T) {
+			target := baseURL + "?pp=5"
+			req := httptest.NewRequest(http.MethodGet, target, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusOK, w.Code)
+
+			body := w.Body.String()
+			assert.Equal(t, 5+1, strings.Count(body, "<tr>"))
+		})
+
+		// Confirm pagination works
+		t.Run("Pagination", func(t *testing.T) {
+			target := baseURL + "?pp=1&p=3"
+			req := httptest.NewRequest(http.MethodGet, target, nil)
+			w := httptest.NewRecorder()
+			router.ServeHTTP(w, req)
+
+			assert.Equal(t, http.StatusOK, w.Code)
+
+			body := w.Body.String()
+			assert.True(t, strings.Contains(body, "Document 2"))
 		})
 	})
 }
