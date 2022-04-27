@@ -3,24 +3,25 @@ package server
 import (
 	"strings"
 
-	"github.com/jbaikge/gocms"
+	"github.com/jbaikge/gocms/models/class"
+	"github.com/jbaikge/gocms/models/document"
 )
 
 // Manages data to build HTML tables
 type Table struct {
-	class     gocms.Class
-	documents []gocms.Document
+	class     class.Class
+	documents []document.Document
 }
 
 // Holds necessary information for table rows including the document and
 // the formatted strings for each column.
 type TableRow struct {
-	Document gocms.Document
+	Document document.Document
 	Columns  []string
 }
 
 // Creates a new table
-func NewTable(class gocms.Class, docs []gocms.Document) Table {
+func NewTable(class class.Class, docs []document.Document) Table {
 	return Table{
 		class:     class,
 		documents: docs,

@@ -4,24 +4,25 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jbaikge/gocms"
+	"github.com/jbaikge/gocms/models/class"
+	"github.com/jbaikge/gocms/models/document"
 	"github.com/zeebo/assert"
 )
 
 func TestEmptyTable(t *testing.T) {
-	table := NewTable(gocms.Class{}, []gocms.Document{})
+	table := NewTable(class.Class{}, []document.Document{})
 	assert.Equal(t, 1, len(table.Header()))
 	assert.Equal(t, 0, len(table.Body()))
 }
 
 func TestPopulatedTable(t *testing.T) {
-	class := gocms.Class{
+	class := class.Class{
 		TableLabels: "Title A B C",
 		TableFields: "title a b c",
 	}
-	docs := make([]gocms.Document, 3)
+	docs := make([]document.Document, 3)
 	for i := range docs {
-		docs[i] = gocms.Document{
+		docs[i] = document.Document{
 			Title: fmt.Sprintf("%d.0", i),
 			Values: map[string]interface{}{
 				"a": fmt.Sprintf("%d.1", i),

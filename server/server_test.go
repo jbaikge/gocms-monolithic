@@ -12,7 +12,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jbaikge/gocms"
+	"github.com/jbaikge/gocms/models/class"
+	"github.com/jbaikge/gocms/models/document"
+	"github.com/jbaikge/gocms/models/field"
 	"github.com/jbaikge/gocms/repository"
 	"github.com/zeebo/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -33,8 +35,8 @@ func TestGetContext(t *testing.T) {
 func TestServer(t *testing.T) {
 	router := gin.Default()
 	repo := repository.NewMemory()
-	classService := gocms.NewClassService(repo)
-	docService := gocms.NewDocumentService(repo)
+	classService := class.NewClassService(repo)
+	docService := document.NewDocumentService(repo)
 	s := New(router, classService, docService)
 	routes := s.Routes()
 
@@ -57,7 +59,7 @@ func TestServer(t *testing.T) {
 
 		// A good class will fall through to the correct handler
 		t.Run("GoodClass", func(t *testing.T) {
-			class := gocms.Class{Slug: "good_class"}
+			class := class.Class{Slug: "good_class"}
 			assert.NoError(t, repo.InsertClass(&class))
 			req := httptest.NewRequest(http.MethodGet, "/admin/classes/good_class/edit", nil)
 			w := httptest.NewRecorder()
@@ -165,7 +167,7 @@ func TestServer(t *testing.T) {
 	t.Run("HandleClassFieldBuilderGet", func(t *testing.T) {
 		// Nothing really exciting happens, a bunch of data gets pushed into the
 		// template context and rendered in the browser
-		class := gocms.Class{Slug: "builder_get"}
+		class := class.Class{Slug: "builder_get"}
 		assert.NoError(t, repo.InsertClass(&class))
 		target := "/admin/classes/" + class.Slug + "/fields"
 		req := httptest.NewRequest(http.MethodGet, target, nil)
@@ -176,7 +178,7 @@ func TestServer(t *testing.T) {
 
 	t.Run("HandleClassFieldsBuilderPost", func(t *testing.T) {
 		type request struct {
-			Fields []gocms.Field `json:"fields"`
+			Fields []field.Field `json:"fields"`
 		}
 
 		type response struct {
@@ -186,15 +188,15 @@ func TestServer(t *testing.T) {
 
 		// Follow all the rules
 		t.Run("Good", func(t *testing.T) {
-			class := gocms.Class{Name: "Builder Good", Slug: "builder_good"}
+			class := class.Class{Name: "Builder Good", Slug: "builder_good"}
 			assert.NoError(t, repo.InsertClass(&class))
 
 			var data request
-			data.Fields = []gocms.Field{
+			data.Fields = []field.Field{
 				{
 					Name:  "my_field",
 					Label: "My Field",
-					Type:  gocms.TypeText,
+					Type:  field.TypeText,
 				},
 			}
 			body := new(bytes.Buffer)
@@ -218,11 +220,11 @@ func TestServer(t *testing.T) {
 
 		// Trigger ClassService.Validate to fail
 		t.Run("Bad", func(t *testing.T) {
-			class := gocms.Class{Name: "Builder Bad", Slug: "builder_bad"}
+			class := class.Class{Name: "Builder Bad", Slug: "builder_bad"}
 			assert.NoError(t, repo.InsertClass(&class))
 
 			var data request
-			data.Fields = []gocms.Field{
+			data.Fields = []field.Field{
 				{
 					Name:  "my_field",
 					Label: "My Label",
@@ -249,16 +251,16 @@ func TestServer(t *testing.T) {
 
 		// Sending in field data as a non-array
 		t.Run("Malformed", func(t *testing.T) {
-			class := gocms.Class{Name: "Builder Malformed", Slug: "builder_malformed"}
+			class := class.Class{Name: "Builder Malformed", Slug: "builder_malformed"}
 			assert.NoError(t, repo.InsertClass(&class))
 
 			data := struct {
-				Fields gocms.Field
+				Fields field.Field
 			}{
-				Fields: gocms.Field{
+				Fields: field.Field{
 					Name:  "my_field",
 					Label: "My Field",
-					Type:  gocms.TypeText,
+					Type:  field.TypeText,
 				},
 			}
 			body := new(bytes.Buffer)
@@ -283,25 +285,25 @@ func TestServer(t *testing.T) {
 
 	t.Run("HandleDocumentBuilder", func(t *testing.T) {
 		type response struct {
-			Document gocms.Document
-			Class    gocms.Class
+			Document document.Document
+			Class    class.Class
 			Error    error
 		}
-		class := gocms.Class{
+		class := class.Class{
 			Name: "Doc Builder",
 			Slug: "builder_class",
-			Fields: []gocms.Field{
+			Fields: []field.Field{
 				{
 					Name:  "field_1",
 					Label: "Field 1",
-					Type:  gocms.TypeText,
+					Type:  field.TypeText,
 				},
 			},
 		}
 		assert.NoError(t, repo.InsertClass(&class))
 		baseURL := "/admin/classes/" + class.Slug
 
-		doc := gocms.Document{ClassId: class.Id, Slug: "builder_doc", Title: "Doc"}
+		doc := document.Document{ClassId: class.Id, Slug: "builder_doc", Title: "Doc"}
 		assert.NoError(t, repo.InsertDocument(&doc))
 
 		// Retrieve the details for a new document form, ask for JSON instead
@@ -395,13 +397,13 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("HandleDocumentList", func(t *testing.T) {
-		class := gocms.Class{Name: "Doc Test", Slug: "doc_test"}
+		class := class.Class{Name: "Doc Test", Slug: "doc_test"}
 		assert.NoError(t, repo.InsertClass(&class))
 		baseURL := "/admin/classes/" + class.Slug + "/"
 
 		numDocs := 10
 		for i := 0; i < numDocs; i++ {
-			doc := gocms.Document{
+			doc := document.Document{
 				ClassId: class.Id,
 				Title:   fmt.Sprintf("Document %d", i),
 				Slug:    fmt.Sprintf("doc_%d", i),

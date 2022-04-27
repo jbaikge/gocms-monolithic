@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jbaikge/gocms"
+	"github.com/jbaikge/gocms/models/class"
+	"github.com/jbaikge/gocms/models/document"
+	"github.com/jbaikge/gocms/models/field"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -36,7 +38,7 @@ func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 	)))
 
 	return func(c *gin.Context) {
-		var class gocms.Class
+		var class class.Class
 		var err error
 
 		// If no Class, then we are on /new
@@ -92,18 +94,18 @@ func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 		Label    string `json:"label"`
 		Template string `json:"template"`
 	}{
-		{gocms.TypeDate, "Date", "date"},
-		{gocms.TypeDateTime, "Date & Time", "date"},
-		{gocms.TypeEmail, "Email", "email"},
-		{gocms.TypeMultiSelect, "Multi-Select", "select"},
-		{gocms.TypeNumber, "Number", "number"},
-		{gocms.TypeSelect, "Select (Class)", "select-class"},
-		{gocms.TypeSelect, "Select (Static)", "select-static"},
-		{gocms.TypeText, "Text", "text"},
-		{gocms.TypeTextArea, "Textarea", "textarea"},
-		{gocms.TypeTime, "Time", "time"},
-		{gocms.TypeTinyMCE, "TinyMCE", "tinymce"},
-		{gocms.TypeUpload, "Upload", "upload"},
+		{field.TypeDate, "Date", "date"},
+		{field.TypeDateTime, "Date & Time", "date"},
+		{field.TypeEmail, "Email", "email"},
+		{field.TypeMultiSelect, "Multi-Select", "select"},
+		{field.TypeNumber, "Number", "number"},
+		{field.TypeSelect, "Select (Class)", "select-class"},
+		{field.TypeSelect, "Select (Static)", "select-static"},
+		{field.TypeText, "Text", "text"},
+		{field.TypeTextArea, "Textarea", "textarea"},
+		{field.TypeTime, "Time", "time"},
+		{field.TypeTinyMCE, "TinyMCE", "tinymce"},
+		{field.TypeUpload, "Upload", "upload"},
 	}
 
 	return func(c *gin.Context) {
@@ -124,7 +126,7 @@ func (s *Server) HandleClassFieldBuilderGet() gin.HandlerFunc {
 
 func (s *Server) HandleClassFieldBuilderPost() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var class gocms.Class
+		var class class.Class
 
 		// class gauranteed to be set per middleware preceding this handler
 		_ = getContext(c, "class", &class)
@@ -163,8 +165,8 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 	loc, _ := time.LoadLocation("America/New_York")
 
 	return func(c *gin.Context) {
-		var class gocms.Class
-		var doc gocms.Document
+		var class class.Class
+		var doc document.Document
 
 		// Class gauranteed to be set from middleware preceding this handler
 		_ = getContext(c, "class", &class)
@@ -216,7 +218,7 @@ func (s *Server) HandleDocumentBuilder() gin.HandlerFunc {
 			if field.DataSourceId.IsZero() {
 				continue
 			}
-			docs := []gocms.Document{
+			docs := []document.Document{
 				{
 					Id:    primitive.NewObjectID(),
 					Slug:  "moo",
@@ -258,7 +260,7 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 	)))
 
 	return func(c *gin.Context) {
-		var class gocms.Class
+		var class class.Class
 
 		// Class gauranteed to be set by middleware preceding this handler
 		_ = getContext(c, "class", &class)
@@ -273,7 +275,7 @@ func (s *Server) HandleDocumentList() gin.HandlerFunc {
 			perPage = 10
 		}
 
-		params := gocms.DocumentListParams{
+		params := document.DocumentListParams{
 			ClassId: class.Id,
 			Page:    page,
 			Size:    perPage,
