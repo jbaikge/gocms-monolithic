@@ -139,233 +139,231 @@ func (r mockDocumentRepository) slugKey(id primitive.ObjectID, slug string) stri
 	return id.Hex() + "_" + slug
 }
 
-func TestDocumentService(t *testing.T) {
-	t.Run("GetById", func(t *testing.T) {
-		service := NewDocumentService(NewMockDocumentRepository())
+func TestGetById(t *testing.T) {
+	service := NewDocumentService(NewMockDocumentRepository())
 
-		doc := Document{ClassId: primitive.NewObjectID(), Slug: "test"}
-		assert.NoError(t, service.Insert(&doc))
+	doc := Document{ClassId: primitive.NewObjectID(), Slug: "test"}
+	assert.NoError(t, service.Insert(&doc))
 
-		check, err := service.GetById(doc.Id)
+	check, err := service.GetById(doc.Id)
+	assert.NoError(t, err)
+	assert.Equal(t, doc.Id, check.Id)
+}
+
+func TestGetBySlug(t *testing.T) {
+	service := NewDocumentService(NewMockDocumentRepository())
+
+	doc := Document{
+		ClassId:  primitive.NewObjectID(),
+		ParentId: primitive.NewObjectID(),
+		Slug:     "test",
+	}
+	assert.NoError(t, service.Insert(&doc))
+
+	t.Run("Class ID", func(t *testing.T) {
+		byClass, err := service.GetClassChildBySlug(doc.ClassId, doc.Slug)
 		assert.NoError(t, err)
-		assert.Equal(t, doc.Id, check.Id)
+		assert.Equal(t, doc.Id, byClass.Id)
 	})
 
-	t.Run("GetBySlug", func(t *testing.T) {
-		service := NewDocumentService(NewMockDocumentRepository())
-
-		doc := Document{
-			ClassId:  primitive.NewObjectID(),
-			ParentId: primitive.NewObjectID(),
-			Slug:     "test",
-		}
-		assert.NoError(t, service.Insert(&doc))
-
-		t.Run("Class ID", func(t *testing.T) {
-			byClass, err := service.GetClassChildBySlug(doc.ClassId, doc.Slug)
-			assert.NoError(t, err)
-			assert.Equal(t, doc.Id, byClass.Id)
-		})
-
-		t.Run("Parent ID", func(t *testing.T) {
-			byParent, err := service.GetChildBySlug(doc.ParentId, doc.Slug)
-			assert.NoError(t, err)
-			assert.Equal(t, doc.Id, byParent.Id)
-		})
+	t.Run("Parent ID", func(t *testing.T) {
+		byParent, err := service.GetChildBySlug(doc.ParentId, doc.Slug)
+		assert.NoError(t, err)
+		assert.Equal(t, doc.Id, byParent.Id)
 	})
+}
 
-	t.Run("Insert", func(t *testing.T) {
-		service := NewDocumentService(NewMockDocumentRepository())
-		classId := primitive.NewObjectID()
-		parentId := primitive.NewObjectID()
+func TestInsert(t *testing.T) {
+	service := NewDocumentService(NewMockDocumentRepository())
+	classId := primitive.NewObjectID()
+	parentId := primitive.NewObjectID()
 
-		tests := []struct {
-			Name     string
-			Error    bool
-			Document Document
-		}{
-			{
-				"Slug Only",
-				true,
-				Document{Slug: "test"},
+	tests := []struct {
+		Name     string
+		Error    bool
+		Document Document
+	}{
+		{
+			"Slug Only",
+			true,
+			Document{Slug: "test"},
+		},
+		{
+			"Class ID Only",
+			true,
+			Document{ClassId: primitive.NewObjectID()},
+		},
+		{
+			"Class ID & Slug",
+			false,
+			Document{ClassId: classId, Slug: "test"},
+		},
+		{
+			"Duplicate Slug",
+			true,
+			Document{ClassId: classId, Slug: "test"},
+		},
+		{
+			"Same Class, New Slug",
+			false,
+			Document{ClassId: classId, Slug: "new_test"},
+		},
+		{
+			"Same Slug, New Class",
+			false,
+			Document{ClassId: primitive.NewObjectID(), Slug: "test"},
+		},
+		{
+			"Existing ID",
+			true,
+			Document{
+				Id:      primitive.NewObjectID(),
+				ClassId: primitive.NewObjectID(),
+				Slug:    "test",
 			},
-			{
-				"Class ID Only",
-				true,
-				Document{ClassId: primitive.NewObjectID()},
+		},
+		{
+			"Parent ID & Slug",
+			false,
+			Document{
+				ClassId:  primitive.NewObjectID(),
+				ParentId: parentId,
+				Slug:     "test",
 			},
-			{
-				"Class ID & Slug",
-				false,
-				Document{ClassId: classId, Slug: "test"},
+		},
+		{
+			"Parent ID & Dupe Slug",
+			true,
+			Document{
+				ClassId:  primitive.NewObjectID(),
+				ParentId: parentId,
+				Slug:     "test",
 			},
-			{
-				"Duplicate Slug",
-				true,
-				Document{ClassId: classId, Slug: "test"},
-			},
-			{
-				"Same Class, New Slug",
-				false,
-				Document{ClassId: classId, Slug: "new_test"},
-			},
-			{
-				"Same Slug, New Class",
-				false,
-				Document{ClassId: primitive.NewObjectID(), Slug: "test"},
-			},
-			{
-				"Existing ID",
-				true,
-				Document{
-					Id:      primitive.NewObjectID(),
-					ClassId: primitive.NewObjectID(),
-					Slug:    "test",
-				},
-			},
-			{
-				"Parent ID & Slug",
-				false,
-				Document{
-					ClassId:  primitive.NewObjectID(),
-					ParentId: parentId,
-					Slug:     "test",
-				},
-			},
-			{
-				"Parent ID & Dupe Slug",
-				true,
-				Document{
-					ClassId:  primitive.NewObjectID(),
-					ParentId: parentId,
-					Slug:     "test",
-				},
-			},
-		}
+		},
+	}
 
-		for _, test := range tests {
-			t.Run(test.Name, func(t *testing.T) {
-				err := service.Insert(&test.Document)
-				if test.Error {
-					assert.Error(t, err)
-				} else {
-					assert.NoError(t, err)
-				}
-			})
-		}
-	})
-
-	t.Run("Update", func(t *testing.T) {
-		service := NewDocumentService(NewMockDocumentRepository())
-
-		t.Run("No ID", func(t *testing.T) {
-			doc := Document{ClassId: primitive.NewObjectID(), Slug: "test"}
-			assert.Error(t, service.Update(&doc))
-		})
-
-		classId := primitive.NewObjectID()
-
-		banana := Document{ClassId: classId, Slug: "banana"}
-		assert.NoError(t, service.Insert(&banana))
-
-		orange := Document{ClassId: classId, Slug: "orange"}
-		assert.NoError(t, service.Insert(&orange))
-
-		t.Run("Blank Slug", func(t *testing.T) {
-			banana.Slug = ""
-			defer func() {
-				banana.Slug = "banana"
-			}()
-
-			assert.Error(t, service.Update(&banana))
-		})
-
-		t.Run("Class Slug Takeover", func(t *testing.T) {
-			banana.Slug = orange.Slug
-			defer func() {
-				banana.Slug = "banana"
-			}()
-
-			assert.Error(t, service.Update(&banana))
-		})
-
-		t.Run("New Class, Dupe Slug", func(t *testing.T) {
-			banana.ClassId = primitive.NewObjectID()
-			banana.Slug = orange.Slug
-			defer func() {
-				banana.ClassId = classId
-				banana.Slug = "banana"
-			}()
-
-			assert.NoError(t, service.Update(&banana))
-		})
-
-		t.Run("Same Parent, Slug Frob", func(t *testing.T) {
-			banana.ParentId = primitive.NewObjectID()
-			orange.ParentId = banana.ParentId
-			defer func() {
-				banana.ParentId = primitive.NilObjectID
-				orange.ParentId = banana.ParentId
-				orange.Slug = "orange"
-			}()
-
-			assert.NoError(t, service.Update(&banana))
-			assert.NoError(t, service.Update(&orange))
-
-			orange.Slug = banana.Slug
-			assert.Error(t, service.Update(&orange))
-		})
-	})
-
-	t.Run("Delete", func(t *testing.T) {
-		service := NewDocumentService(NewMockDocumentRepository())
-
-		doc := Document{ClassId: primitive.NewObjectID(), Slug: "test"}
-		assert.NoError(t, service.Insert(&doc))
-		assert.NoError(t, service.Delete(doc))
-		// Do it once more to make sure it fails silently
-		assert.NoError(t, service.Delete(doc))
-
-		// Make sure document no longer exists
-		_, err := service.GetById(doc.Id)
-		assert.Error(t, err)
-	})
-
-	t.Run("List", func(t *testing.T) {
-		service := NewDocumentService(NewMockDocumentRepository())
-
-		classId := primitive.NewObjectID()
-		ids := make([]primitive.ObjectID, 3)
-
-		for i := range ids {
-			doc := Document{
-				ClassId: classId,
-				Slug:    fmt.Sprintf("test_%d", i),
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			err := service.Insert(&test.Document)
+			if test.Error {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
 			}
-			assert.NoError(t, service.Insert(&doc))
-			ids[i] = doc.Id
-		}
+		})
+	}
+}
 
-		params := DocumentListParams{
-			ClassId: classId,
-			Size:    2,
-			Page:    1,
-		}
-		page1, err := service.List(params)
-		assert.NoError(t, err)
-		assert.Equal(t, 3, page1.Total)
-		assert.Equal(t, 2, len(page1.Documents))
-		for i := range ids[0:2] {
-			assert.Equal(t, ids[i], page1.Documents[i].Id)
-		}
+func TestUpdate(t *testing.T) {
+	service := NewDocumentService(NewMockDocumentRepository())
 
-		params.Page = 2
-		page2, err := service.List(params)
-		assert.NoError(t, err)
-		assert.Equal(t, 3, page2.Total)
-		assert.Equal(t, 1, len(page2.Documents))
-		for i := range ids[2:3] {
-			assert.Equal(t, ids[i], page1.Documents[i].Id)
-		}
+	t.Run("No ID", func(t *testing.T) {
+		doc := Document{ClassId: primitive.NewObjectID(), Slug: "test"}
+		assert.Error(t, service.Update(&doc))
 	})
+
+	classId := primitive.NewObjectID()
+
+	banana := Document{ClassId: classId, Slug: "banana"}
+	assert.NoError(t, service.Insert(&banana))
+
+	orange := Document{ClassId: classId, Slug: "orange"}
+	assert.NoError(t, service.Insert(&orange))
+
+	t.Run("Blank Slug", func(t *testing.T) {
+		banana.Slug = ""
+		defer func() {
+			banana.Slug = "banana"
+		}()
+
+		assert.Error(t, service.Update(&banana))
+	})
+
+	t.Run("Class Slug Takeover", func(t *testing.T) {
+		banana.Slug = orange.Slug
+		defer func() {
+			banana.Slug = "banana"
+		}()
+
+		assert.Error(t, service.Update(&banana))
+	})
+
+	t.Run("New Class, Dupe Slug", func(t *testing.T) {
+		banana.ClassId = primitive.NewObjectID()
+		banana.Slug = orange.Slug
+		defer func() {
+			banana.ClassId = classId
+			banana.Slug = "banana"
+		}()
+
+		assert.NoError(t, service.Update(&banana))
+	})
+
+	t.Run("Same Parent, Slug Frob", func(t *testing.T) {
+		banana.ParentId = primitive.NewObjectID()
+		orange.ParentId = banana.ParentId
+		defer func() {
+			banana.ParentId = primitive.NilObjectID
+			orange.ParentId = banana.ParentId
+			orange.Slug = "orange"
+		}()
+
+		assert.NoError(t, service.Update(&banana))
+		assert.NoError(t, service.Update(&orange))
+
+		orange.Slug = banana.Slug
+		assert.Error(t, service.Update(&orange))
+	})
+}
+
+func TestDelete(t *testing.T) {
+	service := NewDocumentService(NewMockDocumentRepository())
+
+	doc := Document{ClassId: primitive.NewObjectID(), Slug: "test"}
+	assert.NoError(t, service.Insert(&doc))
+	assert.NoError(t, service.Delete(doc))
+	// Do it once more to make sure it fails silently
+	assert.NoError(t, service.Delete(doc))
+
+	// Make sure document no longer exists
+	_, err := service.GetById(doc.Id)
+	assert.Error(t, err)
+}
+
+func TestList(t *testing.T) {
+	service := NewDocumentService(NewMockDocumentRepository())
+
+	classId := primitive.NewObjectID()
+	ids := make([]primitive.ObjectID, 3)
+
+	for i := range ids {
+		doc := Document{
+			ClassId: classId,
+			Slug:    fmt.Sprintf("test_%d", i),
+		}
+		assert.NoError(t, service.Insert(&doc))
+		ids[i] = doc.Id
+	}
+
+	params := DocumentListParams{
+		ClassId: classId,
+		Size:    2,
+		Page:    1,
+	}
+	page1, err := service.List(params)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, page1.Total)
+	assert.Equal(t, 2, len(page1.Documents))
+	for i := range ids[0:2] {
+		assert.Equal(t, ids[i], page1.Documents[i].Id)
+	}
+
+	params.Page = 2
+	page2, err := service.List(params)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, page2.Total)
+	assert.Equal(t, 1, len(page2.Documents))
+	for i := range ids[2:3] {
+		assert.Equal(t, ids[i], page1.Documents[i].Id)
+	}
 }
