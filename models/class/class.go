@@ -1,9 +1,10 @@
-package gocms
+package class
 
 import (
 	"fmt"
 	"time"
 
+	"github.com/jbaikge/gocms/models/field"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -22,12 +23,12 @@ type Class struct {
 	TableFields   string               `json:"table_fields" bson:"table_fields" form:"table_fields"`
 	Created       time.Time            `json:"created"`
 	Updated       time.Time            `json:"updated"`
-	Fields        []Field              `json:"fields"`
+	Fields        []field.Field        `json:"fields"`
 }
 
 // Fetches the field represented by name. If the field does not exist, returns
 // an empty field.
-func (c Class) Field(name string) (field Field) {
+func (c Class) Field(name string) (field field.Field) {
 	for _, f := range c.Fields {
 		if f.Name == name {
 			return f

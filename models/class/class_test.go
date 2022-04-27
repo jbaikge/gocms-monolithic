@@ -1,4 +1,4 @@
-package gocms
+package class
 
 import (
 	"errors"
@@ -6,69 +6,70 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jbaikge/gocms/models/field"
 	"github.com/zeebo/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestClassFieldEmpty(t *testing.T) {
 	class := Class{}
-	field := class.Field("test")
-	assert.DeepEqual(t, Field{}, field)
+	test := class.Field("test")
+	assert.DeepEqual(t, field.Field{}, test)
 }
 
 func TestClassField(t *testing.T) {
 	class := Class{
-		Fields: []Field{
+		Fields: []field.Field{
 			{
 				Name: "test",
 			},
 		},
 	}
 
-	assert.DeepEqual(t, Field{}, class.Field("unknown"))
+	assert.DeepEqual(t, field.Field{}, class.Field("unknown"))
 	assert.Equal(t, "test", class.Field("test").Name)
 }
 
 func TestFieldValidate(t *testing.T) {
 	tests := []struct {
 		Name   string
-		Fields []Field
+		Fields []field.Field
 		Error  error
 	}{
 		{
 			Name: "No Error",
-			Fields: []Field{
+			Fields: []field.Field{
 				{
 					Name:  "my_field",
 					Label: "My Field",
-					Type:  TypeText,
+					Type:  field.TypeText,
 				},
 			},
 			Error: nil,
 		},
 		{
 			Name: "No Name",
-			Fields: []Field{
+			Fields: []field.Field{
 				{
 					Label: "My Field",
-					Type:  TypeText,
+					Type:  field.TypeText,
 				},
 			},
 			Error: errors.New("field[0] name is empty"),
 		},
 		{
 			Name: "No Label",
-			Fields: []Field{
+			Fields: []field.Field{
 				{
 					Name: "my_field",
-					Type: TypeText,
+					Type: field.TypeText,
 				},
 			},
 			Error: errors.New("field[0] label is empty"),
 		},
 		{
 			Name: "No Type",
-			Fields: []Field{
+			Fields: []field.Field{
 				{
 					Name:  "my_field",
 					Label: "My Field",
@@ -78,11 +79,11 @@ func TestFieldValidate(t *testing.T) {
 		},
 		{
 			Name: "Deep",
-			Fields: []Field{
+			Fields: []field.Field{
 				{
 					Name:  "moo",
 					Label: "Moo",
-					Type:  TypeText,
+					Type:  field.TypeText,
 				},
 				{
 					Name:  "cow",

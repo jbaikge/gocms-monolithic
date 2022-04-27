@@ -1,4 +1,4 @@
-package gocms
+package document
 
 import (
 	"fmt"
