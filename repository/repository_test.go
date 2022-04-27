@@ -7,7 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/jbaikge/gocms"
+	"github.com/jbaikge/gocms/models/class"
+	"github.com/jbaikge/gocms/models/document"
 	"github.com/zeebo/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -49,7 +50,7 @@ func TestRepository(t *testing.T) {
 	for _, repo := range repositories(t) {
 		t.Run(reflect.TypeOf(repo).Elem().Name(), func(t *testing.T) {
 			t.Run("DeleteClass", func(t *testing.T) {
-				class := gocms.Class{}
+				class := class.Class{}
 				assert.NoError(t, repo.InsertClass(&class))
 				assert.NoError(t, repo.DeleteClass(class.Id))
 				_, err := repo.GetClassById(class.Id)
@@ -59,7 +60,7 @@ func TestRepository(t *testing.T) {
 
 			t.Run("GetAllClasses", func(t *testing.T) {
 				assert.NoError(t, repo.empty())
-				classes := []gocms.Class{
+				classes := []class.Class{
 					{Name: "Event", Slug: "event"},
 					{Name: "Blog", Slug: "blog"},
 					{Name: "News", Slug: "news"},
@@ -79,7 +80,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("GetClassById", func(t *testing.T) {
-				class := gocms.Class{
+				class := class.Class{
 					Slug: "get_class_by_id",
 				}
 				assert.NoError(t, repo.InsertClass(&class))
@@ -93,7 +94,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("GetClassBySlug", func(t *testing.T) {
-				class := gocms.Class{
+				class := class.Class{
 					Slug: "get_class_by_slug",
 				}
 				assert.NoError(t, repo.InsertClass(&class))
@@ -107,7 +108,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("InsertClass", func(t *testing.T) {
-				class := gocms.Class{
+				class := class.Class{
 					Slug: "insert_class",
 				}
 				assert.NoError(t, repo.InsertClass(&class))
@@ -117,7 +118,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("UpdateClass", func(t *testing.T) {
-				class := gocms.Class{
+				class := class.Class{
 					Slug: "update_class",
 				}
 				assert.NoError(t, repo.InsertClass(&class))
@@ -137,7 +138,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("DeleteDocument", func(t *testing.T) {
-				doc := gocms.Document{}
+				doc := document.Document{}
 				assert.NoError(t, repo.InsertDocument(&doc))
 				assert.NoError(t, repo.DeleteDocument(doc.Id))
 
@@ -146,7 +147,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("GetChildDocumentBySlug", func(t *testing.T) {
-				doc := gocms.Document{
+				doc := document.Document{
 					ClassId:  primitive.NewObjectID(),
 					ParentId: primitive.NewObjectID(),
 					Slug:     "get_child_document_slug",
@@ -163,7 +164,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("GetClassDocumentBySlug", func(t *testing.T) {
-				doc := gocms.Document{
+				doc := document.Document{
 					ClassId:  primitive.NewObjectID(),
 					ParentId: primitive.NewObjectID(),
 					Slug:     "get_class_document_slug",
@@ -184,7 +185,7 @@ func TestRepository(t *testing.T) {
 				ids := make([]primitive.ObjectID, 3)
 
 				for i := range ids {
-					doc := gocms.Document{
+					doc := document.Document{
 						ClassId: classId,
 						Slug:    fmt.Sprintf("test_%d", i),
 					}
@@ -192,7 +193,7 @@ func TestRepository(t *testing.T) {
 					ids[i] = doc.Id
 				}
 
-				params := gocms.DocumentListParams{
+				params := document.DocumentListParams{
 					ClassId: classId,
 					Size:    2,
 					Page:    1,
@@ -221,7 +222,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("GetDocumentById", func(t *testing.T) {
-				doc := gocms.Document{}
+				doc := document.Document{}
 				assert.NoError(t, repo.InsertDocument(&doc))
 
 				check, err := repo.GetDocumentById(doc.Id)
@@ -231,7 +232,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("InsertDocument", func(t *testing.T) {
-				doc := gocms.Document{
+				doc := document.Document{
 					Slug: "create_document",
 				}
 				assert.NoError(t, repo.InsertDocument(&doc))
@@ -241,7 +242,7 @@ func TestRepository(t *testing.T) {
 			})
 
 			t.Run("UpdateDocument", func(t *testing.T) {
-				doc := gocms.Document{
+				doc := document.Document{
 					ClassId: primitive.NewObjectID(),
 					Slug:    "update_document",
 				}
