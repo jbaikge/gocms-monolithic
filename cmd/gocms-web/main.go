@@ -6,7 +6,8 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/jbaikge/gocms"
+	"github.com/jbaikge/gocms/models/class"
+	"github.com/jbaikge/gocms/models/document"
 	"github.com/jbaikge/gocms/repository"
 	"github.com/jbaikge/gocms/server"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -29,8 +30,8 @@ func main() {
 	db := client.Database("gocms-web")
 
 	repo := repository.NewMongo(ctx, db)
-	classService := gocms.NewClassService(repo)
-	documentService := gocms.NewDocumentService(repo)
+	classService := class.NewClassService(repo)
+	documentService := document.NewDocumentService(repo)
 
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
