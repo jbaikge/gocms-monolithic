@@ -29,6 +29,12 @@ func getContext[T any](c *gin.Context, key string, into *T) (err error) {
 	return fmt.Errorf("key not found: %s", key)
 }
 
+func (s *Server) HandleAdminLogin() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.String(http.StatusOK, "This is the login page")
+	}
+}
+
 func (s *Server) HandleClassBuilder() gin.HandlerFunc {
 	name := "admin-class-builder"
 	s.renderer.Add(name, template.Must(template.New("base.html").ParseFS(
