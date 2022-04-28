@@ -1,10 +1,34 @@
 package server
 
 import (
+	"log"
 	"net/http"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func (s *Server) MiddlewareAdminAuth() gin.HandlerFunc {
+	path := "/admin/login"
+
+	return func(c *gin.Context) {
+		session := sessions.Default(c)
+		v := session.Get("adminUserId")
+		switch value := v.(type) {
+		case primitive.ObjectID:
+			log.Printf("User ID: %s", value.Hex())
+			c.Next()
+		default:
+			if c.Request.URL.Path == path {
+				// Prevent an infinite loop
+				return
+			}
+		}
+		c.Redirect(http.StatusTemporaryRedirect, path)
+		c.Abort()
+	}
+}
 
 func (s *Server) MiddlewareClass() gin.HandlerFunc {
 	return func(c *gin.Context) {
