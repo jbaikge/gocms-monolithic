@@ -72,6 +72,11 @@ func (s userService) Update(user *User) (err error) {
 		return fmt.Errorf("user has no ID")
 	}
 
+	check, _ := s.GetByEmail(user.Email)
+	if !check.Id.IsZero() && check.Id != user.Id {
+		return fmt.Errorf("email already used by another user: %s", user.Email)
+	}
+
 	return s.repo.UpdateUser(user)
 }
 

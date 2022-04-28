@@ -175,7 +175,14 @@ func TestUpdate(t *testing.T) {
 	})
 
 	t.Run("Fail Validation", func(t *testing.T) {
-		user1.DisplayName = ""
-		assert.Error(t, service.Update(&user1))
+		fail := user1
+		fail.DisplayName = ""
+		assert.Error(t, service.Update(&fail))
+	})
+
+	t.Run("Overtake Email", func(t *testing.T) {
+		overtake := user2
+		overtake.Email = user1.Email
+		assert.Error(t, service.Update(&overtake))
 	})
 }
