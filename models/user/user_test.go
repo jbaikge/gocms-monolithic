@@ -65,6 +65,61 @@ func (r mockUserRepository) UpdateUser(user *User) (err error) {
 	return
 }
 
+func TestAuthenticate(t *testing.T) {
+	service := NewUserService(NewMockUserRepository())
+
+	noPassUser := User{
+		DisplayName: "Auth User",
+		Email:       "test@test.com",
+	}
+	assert.NoError(t, service.Insert(&noPassUser))
+
+	password := "weakPassword"
+	passUser := User{
+		DisplayName: "Pass User",
+		Email:       "pass@test.com",
+		Password:    password,
+	}
+	assert.NoError(t, service.Insert(&passUser))
+
+	userBlank, err := service.Authenticate(noPassUser.Email, "badPassword")
+	assert.Error(t, err)
+	assert.True(t, userBlank.Id.IsZero())
+
+	// Set a password when existing is blank
+	noPassUser.Password = password
+	assert.NoError(t, service.Update(&noPassUser))
+
+	// Reset password
+	newPassword := "newPassword"
+	passUser.Password = newPassword
+	assert.NoError(t, service.Update(&passUser))
+
+	// Leave password alone when updating with a blank password
+	passUser.Password = ""
+	assert.NoError(t, service.Update(&passUser))
+
+	// Bad email attempt
+	badEmail, err := service.Authenticate("unknown@test.com", newPassword)
+	assert.Error(t, err)
+	assert.True(t, badEmail.Id.IsZero())
+
+	// Blank password attempt
+	testBlank, err := service.Authenticate(passUser.Email, "")
+	assert.Error(t, err)
+	assert.True(t, testBlank.Id.IsZero())
+
+	// Invalid password attempt
+	invalid, err := service.Authenticate(passUser.Email, password)
+	assert.Error(t, err)
+	assert.True(t, invalid.Id.IsZero())
+
+	// Correct password
+	valid, err := service.Authenticate(passUser.Email, newPassword)
+	assert.NoError(t, err)
+	assert.Equal(t, passUser.Id, valid.Id)
+}
+
 func TestGetByEmail(t *testing.T) {
 	service := NewUserService(NewMockUserRepository())
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -22,6 +23,7 @@ type UserRepository interface {
 }
 
 type UserService interface {
+	Authenticate(string, string) (User, error)
 	GetByEmail(string) (User, error)
 	GetById(primitive.ObjectID) (User, error)
 	Insert(*User) error
@@ -36,6 +38,26 @@ func NewUserService(repo UserRepository) UserService {
 	return userService{
 		repo: repo,
 	}
+}
+
+func (s userService) Authenticate(email string, password string) (user User, err error) {
+	u, err := s.GetByEmail(email)
+	if err != nil {
+		return
+	}
+	if u.Password == "" {
+		err = fmt.Errorf("user has no password set")
+		return
+	}
+	if password == "" {
+		err = fmt.Errorf("password is empty")
+		return
+	}
+	hashed, compare := []byte(u.Password), []byte(password)
+	if err = bcrypt.CompareHashAndPassword(hashed, compare); err != nil {
+		return
+	}
+	return u, nil
 }
 
 func (s userService) GetByEmail(email string) (User, error) {
@@ -60,6 +82,15 @@ func (s userService) Insert(user *User) (err error) {
 		return fmt.Errorf("user already has an ID")
 	}
 
+	if user.Password != "" {
+		password := []byte(user.Password)
+		hashed, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashed)
+	}
+
 	return s.repo.InsertUser(user)
 }
 
@@ -75,6 +106,23 @@ func (s userService) Update(user *User) (err error) {
 	check, _ := s.GetByEmail(user.Email)
 	if !check.Id.IsZero() && check.Id != user.Id {
 		return fmt.Errorf("email already used by another user: %s", user.Email)
+	}
+
+	// If the password is empty, leave the current password alone
+	if user.Password == "" {
+		user.Password = check.Password
+	}
+
+	// A new, non-hashed password will give an error during the cost
+	// calculation. As long as the password is non-empty, hash the new password
+	// and store the updated value
+	password := []byte(user.Password)
+	if _, err := bcrypt.Cost(password); len(password) > 0 && err != nil {
+		hashed, err := bcrypt.GenerateFromPassword(password, bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashed)
 	}
 
 	return s.repo.UpdateUser(user)
