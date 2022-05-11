@@ -22,7 +22,7 @@ func (s *Server) Routes() *gin.Engine {
 	// router.POST("/forms/:id", s.HandleForm())
 
 	admin := router.Group("/admin")
-	admin.Use(s.MiddlewareAdminAuth())
+	admin.Use(s.MiddlewareAdminAuth("/admin/login"))
 	admin.Use(s.MiddlewareNavBar())
 	{
 		admin.GET("/", func(c *gin.Context) {

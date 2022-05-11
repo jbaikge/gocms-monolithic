@@ -9,9 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func (s *Server) MiddlewareAdminAuth() gin.HandlerFunc {
-	path := "/admin/login"
-
+func (s *Server) MiddlewareAdminAuth(loginPath string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		session := sessions.Default(c)
 		v := session.Get("adminUserId")
@@ -20,12 +18,12 @@ func (s *Server) MiddlewareAdminAuth() gin.HandlerFunc {
 			log.Printf("User ID: %s", value.Hex())
 			c.Next()
 		default:
-			if c.Request.URL.Path == path {
+			if c.Request.URL.Path == loginPath {
 				// Prevent an infinite loop
 				return
 			}
 		}
-		c.Redirect(http.StatusTemporaryRedirect, path)
+		c.Redirect(http.StatusTemporaryRedirect, loginPath)
 		c.Abort()
 	}
 }
