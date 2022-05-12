@@ -8,10 +8,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/jbaikge/gocms/models/class"
 	"github.com/jbaikge/gocms/models/document"
 	"github.com/jbaikge/gocms/models/field"
+	"github.com/jbaikge/gocms/models/user"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -30,8 +32,28 @@ func getContext[T any](c *gin.Context, key string, into *T) (err error) {
 }
 
 func (s *Server) HandleAdminLogin() gin.HandlerFunc {
+	name := "admin-login"
+	s.renderer.Add(name, template.Must(template.New("base.html").ParseFS(
+		fs,
+		"templates/admin/login.html",
+	)))
+
 	return func(c *gin.Context) {
-		c.String(http.StatusOK, "This is the login page")
+		session := sessions.Default(c)
+
+		if c.Request.Method == http.MethodPost {
+			var adminUser user.User
+			// TODO get adminUser from userService
+			session.Set("adminUserId", adminUser.Id)
+			session.Save()
+			c.Redirect(http.StatusSeeOther, "/admin/dashboard")
+			return
+		}
+
+		obj := gin.H{
+			"Error": nil,
+		}
+		c.HTML(http.StatusOK, name, obj)
 	}
 }
 
