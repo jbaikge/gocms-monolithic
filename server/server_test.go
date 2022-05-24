@@ -15,6 +15,7 @@ import (
 	"github.com/jbaikge/gocms/models/class"
 	"github.com/jbaikge/gocms/models/document"
 	"github.com/jbaikge/gocms/models/field"
+	"github.com/jbaikge/gocms/models/user"
 	"github.com/jbaikge/gocms/repository"
 	"github.com/zeebo/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -37,7 +38,8 @@ func TestServer(t *testing.T) {
 	repo := repository.NewMemory()
 	classService := class.NewClassService(repo)
 	docService := document.NewDocumentService(repo)
-	s := New(router, classService, docService)
+	userService := user.NewUserService(repo)
+	s := New(router, classService, docService, userService)
 	routes := s.Routes()
 
 	t.Run("MiddlewareClass", func(t *testing.T) {
