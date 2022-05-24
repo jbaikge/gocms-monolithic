@@ -7,6 +7,7 @@ import (
 
 	"github.com/jbaikge/gocms/models/class"
 	"github.com/jbaikge/gocms/models/document"
+	"github.com/jbaikge/gocms/models/user"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -19,12 +20,14 @@ func (s sortClasses) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 type memoryRepository struct {
 	classes   []class.Class
 	documents []document.Document
+	users     []user.User
 }
 
 func NewMemory() Repository {
 	return &memoryRepository{
 		classes:   make([]class.Class, 0, 128),
 		documents: make([]document.Document, 0, 128),
+		users:     make([]user.User, 0, 128),
 	}
 }
 
@@ -165,8 +168,25 @@ func (r *memoryRepository) UpdateDocument(doc *document.Document) (err error) {
 	return fmt.Errorf("document not found: %s", doc.Id.Hex())
 }
 
+func (r *memoryRepository) GetUserByEmail(email string) (u user.User, err error) {
+	return
+}
+
+func (r *memoryRepository) GetUserById(id primitive.ObjectID) (u user.User, err error) {
+	return
+}
+
+func (r *memoryRepository) InsertUser(u *user.User) (err error) {
+	return
+}
+
+func (r *memoryRepository) UpdateUser(u *user.User) (err error) {
+	return
+}
+
 func (r *memoryRepository) empty() (err error) {
 	r.classes = r.classes[:0]
 	r.documents = r.documents[:0]
+	r.users = r.users[:0]
 	return
 }

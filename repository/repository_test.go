@@ -9,6 +9,7 @@ import (
 
 	"github.com/jbaikge/gocms/models/class"
 	"github.com/jbaikge/gocms/models/document"
+	"github.com/jbaikge/gocms/models/user"
 	"github.com/zeebo/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -256,6 +257,55 @@ func TestRepository(t *testing.T) {
 				check, err := repo.GetDocumentById(doc.Id)
 				assert.NoError(t, err)
 				assert.Equal(t, doc.Slug, check.Slug)
+			})
+
+			t.Run("GetUserByEmail", func(t *testing.T) {
+				u := user.User{
+					Email: "test@test.com",
+				}
+				assert.NoError(t, repo.InsertUser(&u))
+
+				check, err := repo.GetUserByEmail(u.Email)
+				assert.NoError(t, err)
+				assert.Equal(t, u.Id, check.Id)
+
+				_, err = repo.GetUserByEmail("bad@test.com")
+				assert.Error(t, err)
+			})
+
+			t.Run("GetUserById", func(t *testing.T) {
+				u := user.User{}
+				assert.NoError(t, repo.InsertUser(&u))
+
+				check, err := repo.GetUserById(u.Id)
+				assert.NoError(t, err)
+				assert.Equal(t, u.Id, check.Id)
+
+				_, err = repo.GetUserById(primitive.NewObjectID())
+				assert.Error(t, err)
+			})
+
+			t.Run("InsertUser", func(t *testing.T) {
+				u := user.User{}
+				assert.NoError(t, repo.InsertUser(&u))
+				assert.False(t, u.Id.IsZero())
+			})
+
+			t.Run("UpdateUser", func(t *testing.T) {
+				u := user.User{
+					Email: "test@test.com",
+				}
+				assert.NoError(t, repo.InsertUser(&u))
+
+				u.Email = "new-email@test.com"
+				assert.NoError(t, repo.UpdateUser(&u))
+
+				check, err := repo.GetUserById(u.Id)
+				assert.NoError(t, err)
+				assert.Equal(t, u.Id, check.Id)
+
+				u.Id = primitive.NewObjectID()
+				assert.Error(t, repo.UpdateUser(&u))
 			})
 		})
 	}

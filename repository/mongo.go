@@ -7,6 +7,7 @@ import (
 
 	"github.com/jbaikge/gocms/models/class"
 	"github.com/jbaikge/gocms/models/document"
+	"github.com/jbaikge/gocms/models/user"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,6 +19,7 @@ type mongoRepository struct {
 	db        *mongo.Database
 	classes   *mongo.Collection
 	documents *mongo.Collection
+	users     *mongo.Collection
 }
 
 func NewMongo(ctx context.Context, db *mongo.Database) Repository {
@@ -26,6 +28,7 @@ func NewMongo(ctx context.Context, db *mongo.Database) Repository {
 		db:        db,
 		classes:   db.Collection("classes"),
 		documents: db.Collection("documents"),
+		users:     db.Collection("users"),
 	}
 }
 
@@ -161,6 +164,22 @@ func (m mongoRepository) UpdateDocument(doc *document.Document) (err error) {
 	if result.MatchedCount == 0 {
 		return errors.New("did not match a Document to update")
 	}
+	return
+}
+
+func (r mongoRepository) GetUserByEmail(email string) (u user.User, err error) {
+	return
+}
+
+func (r mongoRepository) GetUserById(id primitive.ObjectID) (u user.User, err error) {
+	return
+}
+
+func (r mongoRepository) InsertUser(u *user.User) (err error) {
+	return
+}
+
+func (r mongoRepository) UpdateUser(u *user.User) (err error) {
 	return
 }
 
