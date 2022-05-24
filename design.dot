@@ -1,17 +1,17 @@
-graph {
-  subgraph cluster_overview {
-    label="Overview"
-    browser -- ui
-    ui -- cms
-    cms -- database
-    cms -- "message service"
-  }
+digraph G {
+  graph [rankdir=LR]
 
-  subgraph cluster_engine {
-    label="CMS Engine"
-    core -- modules
-    modules -- class
-    class -- document
-    modules -- form
-  }
+  User
+  Class
+  Document -> Field
+
+  Repository -> MongoDB
+  Repository -> Memory
+
+  Service -> UserService
+  Service -> ClassService
+  Service -> DocumentService
+
+  Server -> Router
+  Router -> Handlers
 }
